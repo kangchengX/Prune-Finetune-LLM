@@ -1,0 +1,16 @@
+test.py
+.venv/
+.venvaung/
+__pycache__/
+.vscode/
+baffo32/
+cache/
+chain-of-thought-hub/
+hf_cache/
+ll_weights/
+llm-evaluation-harness/
+models/
+out/
+results/
+TransformerCompression/
+wandb/
