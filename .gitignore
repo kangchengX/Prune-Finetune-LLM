@@ -7,7 +7,7 @@ baffo32/
 cache/
 chain-of-thought-hub/
 hf_cache/
-ll_weights/
+llm_weights/
 llm-evaluation-harness/
 models/
 out/
