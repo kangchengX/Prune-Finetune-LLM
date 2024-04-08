@@ -15,6 +15,5 @@ results/
 TransformerCompression/
 wandb/
 plot_test.py
-gc
 runner1.py
 temp_results.py
