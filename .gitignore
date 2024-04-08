@@ -8,7 +8,7 @@ cache/
 chain-of-thought-hub/
 hf_cache/
 llm_weights/
-llm-evaluation-harness/
+lm-evaluation-harness/
 models/
 out/
 results/
