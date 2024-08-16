@@ -303,8 +303,7 @@ def  write_results_v3(type:str, sparsity_txt, metrics):
     with open('res.json', 'w') as file:
         json.dump(data, file, indent=4)
 
-            
-            
+     
 def get_last_sparsity_iter():
     with open('res.json', 'r') as file:
         data = json.load(file)

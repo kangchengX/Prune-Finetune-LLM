@@ -1,7 +1,6 @@
 import os
 import argparse
 import sys
-from factoid_qa import qa_accuracy
 
 import wandb
 cache_path = './hf_cache/'
@@ -57,7 +56,7 @@ if __name__ == "__main__":
         accuracy_mmlu = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="cais/mmlu")
         accuracy_bbh = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="lukaemon/bbh")
         accuracy_belebele = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="facebook/belebele")
-        accuracy_factoid_qa = qa_accuracy(saved_model,tokenizer,torch.device("cuda:0"),num_examples=600)
+        accuracy_factoid_qa = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="kelvin-jiang/factoid-qa")
         ppl = eval_ppl(args, saved_model, tokenizer, device=torch.device("cuda:0"))
         metrics["ppl"] = ppl
         metrics["bbh"] = accuracy_bbh

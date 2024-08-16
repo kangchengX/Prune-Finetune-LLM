@@ -63,38 +63,6 @@ def plot_layers_distr(model, plot_name, file_name):
 
     model.config.use_cache = use_cache 
 
-# def cal_metrics_weights(model, metrics=('mean','std')):
-#     '''calculate the metrics of weights per layer'''
-#     use_cache = model.config.use_cache 
-#     model.config.use_cache = False 
-
-#     layers = model.model.layers
-#     attn_std = []
-#     attn_mean = []
-#     mlp_std = []
-#     mlp_mean = []
-
-#     for i in range(len(layers)):
-#         layer = layers[i]
-#         subset = find_layers(layer)
-
-#         # Mean and std of attn
-#         attn_weights = torch.cat([(subset[name].weight.data) for name in subset][:4])
-#         attn_std.append(attn_weights.std().item())
-#         attn_mean.append(attn_weights.mean().item())
-
-#         # Mean and std of MLP
-#         # mlp_weights = torch.cat([(subset[name].weight.data) for name in subset][4:])
-#         mlp_weights = torch.cat([(subset[name].weight.data) for name in subset][4:-1] + [torch.t(subset['mlp.down_proj'].weight.data)])
-#         mlp_std.append(mlp_weights.std().item())
-#         mlp_mean.append(mlp_weights.mean().item())
-
-#     model.config.use_cache = use_cache 
-
-#     results = {'mean':(mlp_mean,attn_mean),'std':(attn_mean,attn_std)}
-
-#     return results
-
 
 def plot_layers_outliers(model, plot_name, file_name):
     use_cache = model.config.use_cache 
@@ -141,29 +109,6 @@ def plot_layers_outliers(model, plot_name, file_name):
     plt.savefig("plots/" + file_name)
 
     model.config.use_cache = use_cache
-
-
-# def plot_outliers_compare(results1:dict, results2:dict, model_name1:str, model_name2:str):
-#     metrics = list(results1.keys())
-#     for metric in metrics:
-#         metric_values_1_mlp = results1[metric][0]
-#         metric_values_1_attn = results1[metric][1]
-#         metric_values_2_mlp = results2[metric][0]
-#         metric_values_2_attn = results2[metric][1]
-
-#         fig, ax = plt.subplots(2,1,figsize = (12, 12))
-#         ax[0].plot(range(1, len(metric_values_1_mlp)+1), metric_values_1_mlp,
-#                    'r-^', markersize=5, markerfacecolor='none', label = 'model '+model_name1)
-#         ax[0].plot(range(1, len(metric_values_2_mlp)+1), metric_values_2_mlp,
-#                    'g-s',markersize=5,markerfacecolor='none', label = 'model '+model_name2)
-
-#         ax[1].plot(range(1, len(metric_values_1_attn)+1),metric_values_1_attn,
-#                    'r-^', markersize=5, markerfacecolor='none', label = 'model '+model_name1)
-#         ax[1].plot(range(1, len(metric_values_2_attn)+1), metric_values_2_attn, 
-#                    'g-s', markersize=5, markerfacecolor='none', label = 'model '+model_name2)
-
-#         plt.legend()
-#         plt.savefig(model_name1+'-'+model_name2+'_'+metric+'.png')
 
 
 def plot_layers_min_max(model, plot_name, file_name):
@@ -216,9 +161,6 @@ def plot_layers_min_max(model, plot_name, file_name):
 
     model.config.use_cache = use_cache
 
-
-import torch
-import matplotlib.pyplot as plt
 
 def plot_layers_cumulative_diff(model_a, model_b, name_a, name_b, file_name, top_k_percent=100):
     use_cache_a = model_a.config.use_cache
@@ -287,39 +229,13 @@ models = {
     'models/prune_ft05': 'Pruning 0.5 + Finetuning 0.1 epoch',
     'models/ft_iter': 'Finetuning 0.5 epoch',
     'models/ft': 'Finetuning 0.1 epoch'
-    }
+}
 
 
 
 for path in models.keys():
     plot_name = models[path]
     file_name = path.split("/")[-1]
-    # saved_model = AutoPeftModelForCausalLM.from_pretrained(path + "/adapter")
-    # plot_layers_distr(saved_model, plot_name, file_name)
-    #plot_layers_outliers(saved_model, plot_name, file_name+"_out")
-    # plot_layers_min_max(saved_model,plot_name,file_name+"_min_max")
-
-
-
-# path_a = "/cs/student/projects3/COMP0087/grp1/models/iter/prune_ft0_77"
-# path_b = "/cs/student/projects3/COMP0087/grp1/models/prune_ft05"
-# model_a = AutoModelForCausalLM.from_pretrained(path_a)
-# model_b = AutoModelForCausalLM.from_pretrained(path_b)
-
-# plot_layers_cumulative_diff(model_a, model_b,  "(Pr-Ft)x5 [sp:0.42]", "Pr-Ft [sp:0.42]", "pr-ft_042", top_k_percent=5)
-
-
-# path_a = "/cs/student/projects3/COMP0087/grp1/models/iter/prune_ft0_85"
-# path_b = "/cs/student/projects3/COMP0087/grp1/models/prune_033"
-# model_a = AutoModelForCausalLM.from_pretrained(path_a)
-# model_b = AutoModelForCausalLM.from_pretrained(path_b)
-
-# plot_layers_cumulative_diff(model_a, model_b,  "(Pr-Ft)x4 [sp:0.33]", "Pr [sp:0.33]", "pr-ft_033_vs_pr_033", top_k_percent=5)
-
-# path_a = "/cs/student/projects3/COMP0087/grp1/models/iter/prune_ft0_10"
-# path_b = "/cs/student/projects3/COMP0087/grp1/models/prune_ft01"
-# model_a = AutoModelForCausalLM.from_pretrained(path_a)
-# model_b = AutoModelForCausalLM.from_pretrained(path_b)
 
 plots = [
     {
