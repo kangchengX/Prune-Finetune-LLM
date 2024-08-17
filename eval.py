@@ -1,9 +1,8 @@
 import torch, re
-from typing import Literal
 from datasets import load_dataset
 from tqdm import tqdm 
 from transformers import AutoTokenizer
-from factoid_qa.freebase_qa import FreebaseQA
+from .factoid_qa.freebase_qa import FreebaseQA
 from utils import get_response,parse_choice
 
 

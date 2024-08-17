@@ -1,10 +1,10 @@
-import subprocess
-import os
-import argparse
-cache_path = './hf_cache/'
+import subprocess, os, argparse
 
+
+cache_path = './hf_cache/'
 os.environ['HF_HOME']=cache_path
 os.environ['TRANSFORMERS_CACHE'] = cache_path
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

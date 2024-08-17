@@ -1,16 +1,15 @@
 import os
-cache_path = './hf_cache/'
-
-os.environ['HF_HOME']=cache_path
-os.environ['TRANSFORMERS_CACHE'] = cache_path
-
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
+from utils import find_layers
+from peft import PeftModelForCausalLM
+from transformers import AutoModelForCausalLM
 
-from utils import get_llm, find_layers
-from peft import AutoPeftModelForCausalLM, PeftModelForCausalLM
-from transformers import AutoModelForCausalLM,AutoTokenizer
+
+cache_path = './hf_cache/'
+os.environ['HF_HOME']=cache_path
+os.environ['TRANSFORMERS_CACHE'] = cache_path
 
 
 def plot_layers_distr(model, plot_name, file_name):

@@ -1,27 +1,13 @@
-import os
-import subprocess
-import random
-import torch
-from datasets import load_dataset
+import os, subprocess, json, sys
+import torch, bitsandbytes
 import torch.nn as nn
-import transformers
-import sys
-import evaluate
-import numpy as np
-from tqdm import tqdm 
-import pandas as pd
-
 from datasets import load_dataset
-from transformers import Trainer, TrainingArguments
-from transformers import AutoModelForCausalLM,AutoTokenizer
-from wanda.lib.eval import eval_ppl
-import bitsandbytes
-import wandb
-import json
-from peft import LoraConfig, get_peft_model, AutoPeftModelForCausalLM, PeftModel
+from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer, DataCollatorForLanguageModeling, PreTrainedModel
+from peft import LoraConfig, get_peft_model, AutoPeftModelForCausalLM
+from typing import Type
 
 
-def freeze_weights(model):
+def freeze_weights(model: nn.Module):
     #freezing original weights
     for param in model.parameters():
         param.requires_grad = False  # freeze the model - train adapters later
@@ -29,14 +15,19 @@ def freeze_weights(model):
             # cast the small parameters (e.g. layernorm) to fp32 for stability
             param.data = param.data.to(torch.float32)
 
-def find_layers(module, layers=[nn.Linear,bitsandbytes.nn.Linear8bitLt], name=''):
+
+class CastOutputToFloat(nn.Sequential):
+    def forward(self, x): return super().forward(x).to(torch.float16)
+
+
+def find_layers(module: nn.Module, layers: list[Type] | None = [nn.Linear,bitsandbytes.nn.Linear8bitLt], name: str | None = ''):
     """
     Recursively find the layers of a certain type in a module.
 
     Args:
-        module (nn.Module): PyTorch module.
-        layers (list): List of layer types to find.
-        name (str): Name of the module.
+        module (Module): PyTorch module.
+        layers (list): List of layer types to find. Default to `[nn.Linear,bitsandbytes.nn.Linear8bitLt]`.
+        name (str): Name of the module. Default to `''`.
 
     Returns:
         dict: Dictionary of layers of the given type(s) within the module.
@@ -51,9 +42,7 @@ def find_layers(module, layers=[nn.Linear,bitsandbytes.nn.Linear8bitLt], name=''
     return res
 
 
-
-
-def check_sparsity(model):
+def check_sparsity(model: PreTrainedModel):
     use_cache = model.config.use_cache 
     model.config.use_cache = False 
 
@@ -82,7 +71,7 @@ def check_sparsity(model):
     return float(count)/total_params 
 
 
-def get_response(prompt, saved_model:AutoModelForCausalLM, tokenizer:AutoTokenizer, device=torch.device("cuda:0"),max_new_tokens=1):
+def get_response(prompt, saved_model: AutoModelForCausalLM, tokenizer:AutoTokenizer, device=torch.device("cuda:0"),max_new_tokens=1):
     inputs = tokenizer(prompt, return_tensors="pt").input_ids
     inputs = inputs.to(device)
     outputs = saved_model.generate(inputs,
@@ -115,46 +104,53 @@ def parse_choice_bbh(response):
     else:
         return None
 
-def finetune(tokenizer, model_name, save_path, i=1, epochs=0.1):
+def finetune(
+        tokenizer: AutoTokenizer, 
+        model_name: str, 
+        save_path: str, 
+        seed: int | None = 1, 
+        epochs: int | float | None = 0.1
+):
+    """
+    Fine-tuning the model using LoRA.
 
-    model = AutoModelForCausalLM.from_pretrained(model_name,
-                                                torch_dtype=torch.float16,
-                                                # low_cpu_mem_usage=True, 
-                                                load_in_8bit=True,
-                                                device_map='cuda:0')
+    Args:
+        tokenizer (AutoTokenizer): tokenizer for the model.
+        model_name (str): Can be either:
+            A string with the shortcut name of a pretrained model to load from cache or download, e.g., bert-base-uncased.
+            A string with the identifier name of a pretrained model that was user-uploaded to our S3, e.g., dbmdz/bert-base-german-cased.
+            A path to a directory containing model weights saved using save_pretrained(), e.g., ./my_model_directory/.
+            A path or url to a tensorflow index checkpoint file (e.g, ./tf_model/model.ckpt.index). In this case, from_tf should be set to True and a configuration object should be provided as config argument. This loading path is slower than converting the TensorFlow checkpoint in a PyTorch model using the provided conversion scripts and loading the PyTorch model afterwards.
+        seed (int): seed during training.
+        save_path (str): path to save the model.
+        epochs (float): number of epochs.  
+    """
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype=torch.float16,
+        load_in_8bit=True,
+        device_map='cuda:0'
+    )
+    # replace pad token with eos (end of sequence token)
     tokenizer.pad_token = tokenizer.eos_token
     
     model.gradient_checkpointing_enable()  # reduce number of stored activations
-    model.enable_input_require_grads()
-
-    class CastOutputToFloat(nn.Sequential):
-        def forward(self, x): return super().forward(x).to(torch.float16)
+    model.enable_input_require_grads() # enable gradients with respect to the embedding
     model.lm_head = CastOutputToFloat(model.lm_head)
 
-
-    #setting up LORA Adapters
+    # setting up LORA Adapters
     config = LoraConfig(
-        r=8, #attention heads (before it was 16)
-        # target_modules='all-linear',
-        lora_alpha=16, #alpha scaling
+        r=8,
+        lora_alpha=16,
         lora_dropout=0.05,
         bias="none",
-        task_type="CAUSAL_LM" # set this for CLM or Seq2Seq
+        task_type="CAUSAL_LM"
     )
     model = get_peft_model(model, config)
 
     #loading dataset
     data = load_dataset("wikitext",'wikitext-2-raw-v1')
-
-    #changing the form of the data
-    #def merge_columns(example):
-    #    example['text'] = example['text'] + example['text']
-    #    return example
-
-    #data['train'] = data['train'].map(merge_columns)
     data = data.map(lambda samples: tokenizer(samples['text'], padding='max_length', truncation= True), batched=True)
-
-    # metric = evaluate.load("accuracy")#evaluate.load("perplexity",module_type="metric")
 
     # Fine-tune the model
     for _ in range(2):
@@ -163,30 +159,26 @@ def finetune(tokenizer, model_name, save_path, i=1, epochs=0.1):
             gradient_accumulation_steps=4,
             warmup_steps=100,
             num_train_epochs = epochs,
-            seed = i,
+            seed=seed,
             learning_rate=2e-4,
             fp16=True,
             logging_steps=1,
             output_dir=save_path, 
             save_strategy="steps",
-            save_steps=200,
-            # resume_from_checkpoint=save_path+"/checkpoint-200",
-            report_to="wandb" 
+            save_steps=200
         )
 
         trainer = Trainer(
             model=model,
             args=trainer_args,
             train_dataset= data['train'], # type: ignore
-            data_collator=transformers.DataCollatorForLanguageModeling(tokenizer, mlm=False),
+            data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False),
         )
 
-        model.config.use_cache = False 
-        trainer.train(
-            # resume_from_checkpoint=True
-            )
+        model.config.use_cache = False # don't store key and value states 
+        trainer.train()
     
-    #We need to first save the adapter model (this is useful if we need to remove the adapter)
+    # Save the adapter model (this is useful if we need to remove the adapter)
     model.save_pretrained(save_path+"/adapter")
     #Then reload it and save it merged:
     merge_peft(tokenizer,save_path)

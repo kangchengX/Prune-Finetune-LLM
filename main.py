@@ -1,20 +1,16 @@
-import os
-import argparse
-import sys
+import os, argparse
+import torch
+from transformers import AutoTokenizer
+from .wanda.lib.eval import eval_ppl
+from .wanda.lib.prune_opt import check_sparsity
+from utils import finetune, prune, get_llm, write_results_v3
+from eval import eval_model
 
-import wandb
+
 cache_path = './hf_cache/'
-
 os.environ['HF_HOME']=cache_path
 os.environ['TRANSFORMERS_CACHE'] = cache_path
 
-import torch
-from transformers import AutoTokenizer
-from wanda.lib.eval import eval_ppl, eval_zero_shot
-from wanda.lib.prune_opt import check_sparsity
-from utils import finetune, gen_path, prune, get_llm, write_results_v3
-from eval import eval_model
-import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -68,8 +64,3 @@ if __name__ == "__main__":
     
     metrics["sparsity"] = round(sparsity,2)
     write_results_v3(args.out_type, args.sparsity, metrics)
-
-    # wandb.log({"ppl":ppl_test})
-
-    print("Doing chmod")
-    # os.system("chmod -Rf 770 ./")

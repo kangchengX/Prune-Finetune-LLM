@@ -1,13 +1,12 @@
 import subprocess
 import os
-import argparse
+from utils import get_last_sparsity_iter
+
 
 cache_path = './hf_cache/'
-
 os.environ['HF_HOME']=cache_path
 os.environ['TRANSFORMERS_CACHE'] = cache_path
 
-from utils import get_last_sparsity_iter
 
 if __name__ == "__main__":
     current_directory = os.getcwd()
