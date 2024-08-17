@@ -270,8 +270,7 @@ def initialize_file(file_name:str):
     data["iter"] = []
     with open(f'{file_name.split(".")[0]}.json', 'w') as file:
         json.dump(data, file, indent=4)
-
-
+        
 
 def  write_results_v3(type:str, sparsity_txt, metrics):
     assert type == "finetune" or \

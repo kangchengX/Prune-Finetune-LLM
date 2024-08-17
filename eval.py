@@ -1,22 +1,13 @@
-import os
-import subprocess
-import random
-import torch
-from datasets import load_dataset
-import torch.nn as nn
-import transformers
-import sys
-from tqdm import tqdm 
-import re
-from datasets import load_dataset
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from utils import get_response,parse_choice
-from datasets import Dataset 
-from factoid_qa import qa_accuracy
+import torch, re
 from typing import Literal
+from datasets import load_dataset
+from tqdm import tqdm 
+from transformers import AutoTokenizer
 from factoid_qa.freebase_qa import FreebaseQA
+from utils import get_response,parse_choice
 
-def eval_model(saved_model, tokenizer, device, ds_name=None, qa_num_examples = 600, qa_data_path = "FreebaseQA-train.json"):
+
+def eval_model(saved_model, tokenizer, device, ds_name=None, qa_num_examples=600, qa_data_path="FreebaseQA-train.json"):
     if ds_name == "facebook/belebele":
         return eval_belebele(saved_model, tokenizer, device=device)
     elif ds_name == "lukaemon/bbh":
