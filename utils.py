@@ -72,7 +72,7 @@ def check_sparsity(model: PreTrainedModel):
 
 
 def get_response(prompt, saved_model: AutoModelForCausalLM, tokenizer:AutoTokenizer, device=torch.device("cuda:0"),max_new_tokens=1):
-    inputs = tokenizer(prompt, return_tensors="pt").input_ids
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True).input_ids
     inputs = inputs.to(device)
     outputs = saved_model.generate(inputs,
                                     max_new_tokens=max_new_tokens,
@@ -153,30 +153,29 @@ def finetune(
     data = data.map(lambda samples: tokenizer(samples['text'], padding='max_length', truncation= True), batched=True)
 
     # Fine-tune the model
-    for _ in range(2):
-        trainer_args = TrainingArguments(
-            per_device_train_batch_size=4,
-            gradient_accumulation_steps=4,
-            warmup_steps=100,
-            num_train_epochs = epochs,
-            seed=seed,
-            learning_rate=2e-4,
-            fp16=True,
-            logging_steps=1,
-            output_dir=save_path, 
-            save_strategy="steps",
-            save_steps=200
-        )
+    trainer_args = TrainingArguments(
+        per_device_train_batch_size=4,
+        gradient_accumulation_steps=4,
+        warmup_steps=100,
+        num_train_epochs = epochs,
+        seed=seed,
+        learning_rate=2e-4,
+        fp16=True,
+        logging_steps=1,
+        output_dir=save_path, 
+        save_strategy="steps",
+        save_steps=200
+    )
 
-        trainer = Trainer(
-            model=model,
-            args=trainer_args,
-            train_dataset= data['train'], # type: ignore
-            data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False),
-        )
+    trainer = Trainer(
+        model=model,
+        args=trainer_args,
+        train_dataset= data['train'], # type: ignore
+        data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=False),
+    )
 
-        model.config.use_cache = False # don't store key and value states 
-        trainer.train()
+    model.config.use_cache = False # don't store key and value states 
+    trainer.train()
     
     # Save the adapter model (this is useful if we need to remove the adapter)
     model.save_pretrained(save_path+"/adapter")
