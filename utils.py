@@ -4,7 +4,7 @@ import torch.nn as nn
 from datasets import load_dataset
 from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer, DataCollatorForLanguageModeling, PreTrainedModel
 from peft import LoraConfig, get_peft_model, AutoPeftModelForCausalLM
-from typing import Type
+from typing import Type, List
 
 
 def freeze_weights(model: nn.Module):
@@ -71,19 +71,41 @@ def check_sparsity(model: PreTrainedModel):
     return float(count)/total_params 
 
 
-def get_response(prompt, saved_model: AutoModelForCausalLM, tokenizer:AutoTokenizer, device=torch.device("cuda:0"),max_new_tokens=1):
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True).input_ids
+def get_response(
+        prompt: str, 
+        model: AutoModelForCausalLM, 
+        tokenizer: AutoTokenizer, 
+        device: torch.device | None = torch.device("cuda:0"), 
+        max_new_tokens: int | None = 1
+) -> str:
+    """
+    Generates a response from a given prompt durning model inference.
+
+    Args:
+        prompt (str): The input text prompt to generate a response for.
+        model (AutoModelForCausalLM): The pre-trained language model to use for generation.
+        tokenizer (AutoTokenizer): The tokenizer associated with the model for processing the input prompt.
+        device (device): The device to run the model on. Defaults to `torch.device("cuda:0")`.
+        max_new_tokens (int): The maximum number of new tokens to generate. Defaults to `1`.
+
+    Returns:
+        str: The generated response text.
+    """
+
+    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=model.seqlen).input_ids
     inputs = inputs.to(device)
-    outputs = saved_model.generate(inputs,
-                                    max_new_tokens=max_new_tokens,
-                                    do_sample=True,
-                                    repetition_penalty=1.18,
-                                    temperature=0.01,
-                                    top_k=40,
-                                    # top_p=0.1,
-                                    pad_token_id=tokenizer.eos_token_id
-                                    )
+    outputs = model.generate(
+        inputs,
+        max_new_tokens=max_new_tokens,
+        do_sample=True,
+        repetition_penalty=1.18,
+        temperature=0.01,
+        top_k=40,
+        # top_p=0.1,
+        pad_token_id=tokenizer.eos_token_id
+    )
     response = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
     return response
 
 
@@ -209,6 +231,7 @@ def get_llm(model_name, cache_dir="hf_cache", use_8bit=False):
     )
 
     model.seqlen = model.config.max_position_embeddings 
+
     return model
 
 def gen_path(path):
@@ -222,7 +245,16 @@ def gen_path(path):
     else:
         print(f"Directory '{path}' already exists.")
 
-def prune(save_path, model = "baffo32/decapoda-research-llama-7B-hf", sparsity=0.5):
+
+def validate_response(correct_answer: List[str], generated_output: str):
+    generated_output = generated_output.strip().replace(" ", "").lower()
+    correct_answer = [item.strip().replace(" ", "").lower() for item in correct_answer]
+    for ans in correct_answer:
+        if ans in generated_output: return 1
+    return 0
+
+
+def prune(model: str | None = "baffo32/decapoda-research-llama-7B-hf", save_path: str | None = None, sparsity: float | None = 0.5):
     '''prune the model
     
     Input:
@@ -236,14 +268,15 @@ def prune(save_path, model = "baffo32/decapoda-research-llama-7B-hf", sparsity=0
     # Define the command to prune the model using Wanda pruning method
     print("PATH",sys.path)
     prune_command = [
-        "python", "wanda/main.py",
+        "python", os.path.join(os.path.dirname(__file__),"wanda/main.py"),
         "--model", model,
         "--prune_method", "wanda",
         "--sparsity_ratio", f"{sparsity}",
-        "--sparsity_type", "unstructured",
-        "--save", "out/llama_7b/unstructured/wanda/",
-        "--save_model", save_path
+        "--sparsity_type", "unstructured"
     ]
+
+    if save_path is not None:
+        prune_command += ["--save_model", save_path]
 
     # Run the command
     subprocess.run(prune_command)

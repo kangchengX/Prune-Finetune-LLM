@@ -34,7 +34,7 @@ if __name__ == "__main__":
     if args.action == "finetune" and args.train:
         finetune(tokenizer, args.model_path, args.save_path, args.i, args.epochs)
     elif args.action == "prune" and args.train:
-        prune(args.save_path, model=args.model_path, sparsity=args.sparsity)
+        prune(model=args.model_path, save_path=args.save_path, sparsity=args.sparsity)
     
     saved_model = None
     metrics = {"iterations": round(args.i*args.epochs,2)}
