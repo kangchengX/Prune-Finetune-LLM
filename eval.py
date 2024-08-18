@@ -136,8 +136,7 @@ def eval_bbh_logical_deduction_five(
     """
     Evaluate bbh.
     """
-    ds = load_dataset("lukaemon/bbh", "logical_deduction_five_objects",split="test")
-    ds = load_dataset("cais/mmlu", split="test", name="all")
+    ds = load_dataset("lukaemon/bbh", "logical_deduction_five_objects", split="test")
     ds_examples, ds_prompts=select_dataset(ds, num_examples=5, num_prompts=num_prompts)
 
     prompt_template = """
@@ -186,7 +185,6 @@ def eval_belebele(
     Evalute belebele.
     """
     ds = load_dataset(path="facebook/belebele", name="eng_Latn", split="test")
-    ds = load_dataset("cais/mmlu", split="test", name="all")
     ds_examples, ds_prompts=select_dataset(ds, num_examples=5, num_prompts=num_prompts)
 
     prompt_template="""{flores_passage}
