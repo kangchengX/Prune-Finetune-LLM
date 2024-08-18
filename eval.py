@@ -2,10 +2,10 @@ import torch, re, os, warnings
 from datasets import load_dataset
 from tqdm import tqdm 
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from typing import Literal, List
+from typing import Literal
 from datasets import DatasetDict, Dataset, IterableDatasetDict, IterableDataset
 from factoid_qa.freebase_qa import FreebaseQA
-from utils import get_response,parse_choice
+from utils import get_response, parse_choice, validate_response
 
 
 def eval_model(
@@ -28,7 +28,7 @@ def eval_model(
         qa_data_path (str): path of the data for factoid qa.
 
     Returns:
-        out (float): value of the metric.
+        out (float): value of the metric, which is accuracy multiplied by 100.
     """
     model.eval()
     if ds_name == "facebook/belebele":
@@ -105,11 +105,10 @@ def eval_mmlu(
     
     # Loop through prompts and evaluate model responses
     q_correct = q_total = 0
-    for rowNo, row in enumerate(tqdm(ds_prompts)):        
+    for row in tqdm(ds_prompts, desc='MMLU'):        
         # Construct the prompt by combining the example prompts and the current row's question
         prompt = (prompt_examples + "\n\n" + prompt_template.format(**row, target="")).strip()
-        max_new_tokens=1
-        response = get_response(prompt, model, tokenizer, device, max_new_tokens)
+        response = get_response(prompt, model, tokenizer, device, max_new_tokens=1)
 
         match = re.findall(r'Correct answer: \(?[A-D]', response[0])
         if len(match)>=1:
@@ -119,10 +118,10 @@ def eval_mmlu(
 
         # Parse the model's choice and compare it to the correct answer
         if choice == choices[int(row["answer"])]:
-            q_correct+=1 
-        q_total+=1
+            q_correct += 1 
+        q_total += 1
 
-    accuracy = q_correct/q_total*100
+    accuracy = q_correct / q_total * 100
     return accuracy
 
 
@@ -152,11 +151,10 @@ def eval_bbh_logical_deduction_five(
 
     # Loop through prompts and evaluate model responses
     q_correct = q_total = 0
-    for rowNo, row in enumerate(tqdm(ds_prompts)):        
+    for row in tqdm(ds_prompts, desc='BBH'):        
         # Construct the prompt by combining the example prompts and the current row's question
         prompt = (prompt_examples + "\n\n" + prompt_template.format(input=row["input"], target="")).strip()
-        max_new_tokens=3
-        response = get_response(prompt, model, tokenizer, device, max_new_tokens)
+        response = get_response(prompt, model, tokenizer, device, 3)
 
         # Generate a response from the model
         match = re.findall(r'Correct answer: \(?[A-E]', response[0])
@@ -168,10 +166,10 @@ def eval_bbh_logical_deduction_five(
         # Parse the model's choice and compare it to the correct answer
         # choice = parse_choice_bbh(response[-3:].strip())
         if choice == row["target"][1]:
-            q_correct+=1 
-        q_total+=1
+            q_correct += 1 
+        q_total += 1
 
-    accuracy = q_correct/q_total*100
+    accuracy = q_correct / q_total * 100
     return accuracy
 
 
@@ -204,35 +202,27 @@ def eval_belebele(
 
     # Loop through prompts and evaluate model responses
     q_correct = q_total = 0
-    for rowNo, row in enumerate(tqdm(ds_prompts)):        
+    for row in tqdm(ds_prompts, desc='Belebele'):        
         # Construct the prompt by combining the example prompts and the current row's question
         prompt_examples = "\n\n".join([prompt_template.format(**d,correct_answer=choices[int(d["correct_answer_num"])-1]) for d in ds_examples])
         prompt = (prompt_examples + "\n\n" + prompt_template.format(**row, correct_answer="")).strip()
 
-        response = get_response(prompt, model, tokenizer, device)
+        response = get_response(prompt, model, tokenizer, device, max_new_tokens=1)
         match = re.findall(r'Correct answer: [A-D]', response[0])
-        if len(match)>=6:
+        if len(match) >= 6:
             choice = match[-1]
         else:
             choice = "(NO CHOICE)"
 
         # Parse the model's choice and compare it to the correct answer
-        choice=parse_choice(choice.strip())#response[0].strip())
-        if choice==int(row["correct_answer_num"]):
-            q_correct+=1 
-        q_total+=1
+        choice = parse_choice(choice.strip())#response[0].strip())
+        if choice == int(row["correct_answer_num"]):
+            q_correct += 1 
+        q_total += 1
 
     # print(f"{q_total} questions, {q_correct} correct ({round(q_correct/q_total*100,1)}%)")  
-    accuracy = q_correct/q_total*100
+    accuracy = q_correct / q_total *100
     return accuracy
-
-
-def validate_response(correct_answer: List[str], generated_output: str):
-    generated_output = generated_output.strip().replace(" ", "").lower()
-    correct_answer = [item.strip().replace(" ", "").lower() for item in correct_answer]
-    for ans in correct_answer:
-        if ans in generated_output: return 1
-    return 0
 
 
 def qa_accuracy(
@@ -251,8 +241,8 @@ def qa_accuracy(
     exact_match = 0
     num_prompts_fed = 0
 
-    for question, answers in freebase_qa._generate_examples(freebase_filepath):
-        if num_prompts_fed > num_prompts: 
+    for question, answers in tqdm(freebase_qa._generate_examples(freebase_filepath), total=num_prompts, desc='Factoid QA'):
+        if num_prompts_fed >= num_prompts: 
             break
         
         lamma_prompt = f"Please give answer to this question: {question}\nThe answer is "
@@ -265,5 +255,6 @@ def qa_accuracy(
         exact_match += is_match
         num_prompts_fed += 1
 
-    return(exact_match/num_prompts)
+    accuracy = exact_match / num_prompts * 100
 
+    return accuracy
