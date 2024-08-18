@@ -110,7 +110,7 @@ def parse_choice_bbh(response):
     return response[-3:]
 
 def eval_belebele(saved_model, tokenizer:AutoTokenizer, device=torch.device("cuda:0")):
-    ds = load_dataset(path="facebook/belebele", split="eng_Latn")
+    ds = load_dataset(path="facebook/belebele", name="eng_Latn", split="test")
 
     ds_examples = ds.select(range(0,5))
     ds_prompts = ds.select(range(5, len(ds)))
