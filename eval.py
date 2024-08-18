@@ -3,7 +3,7 @@ from datasets import load_dataset
 from tqdm import tqdm 
 from transformers import AutoTokenizer
 from .factoid_qa.freebase_qa import FreebaseQA
-from utils import get_response,parse_choice
+from .utils import get_response,parse_choice
 
 
 def eval_model(saved_model, tokenizer, device, ds_name=None, qa_num_examples=600, qa_data_path="FreebaseQA-train.json"):
