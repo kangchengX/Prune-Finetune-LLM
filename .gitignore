@@ -17,3 +17,4 @@ wandb/
 plot_test.py
 runner1.py
 temp_results.py
+res.json
