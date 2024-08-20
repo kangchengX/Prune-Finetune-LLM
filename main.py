@@ -1,10 +1,11 @@
-import os, argparse
+import os, argparse, warnings
 import torch
 from transformers import AutoTokenizer
 from .wanda.lib.eval import eval_ppl
 from .wanda.lib.prune_opt import check_sparsity
-from utils import finetune, prune, get_llm, write_results_v3
+from utils import get_llm, write_results
 from eval import eval_model
+from process import finetune, prune
 
 
 cache_path = './hf_cache/'
@@ -14,41 +15,49 @@ os.environ['TRANSFORMERS_CACHE'] = cache_path
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--sparsity', type=float, help='sparsity', default=0.0)
-    parser.add_argument('--train', type=str, help='whether to prune/finetune or not', default="True")
-    parser.add_argument('--action', type=str, help='action to perform', default="base")
-    parser.add_argument('--out_type', type=str, help='Type of the output in write.txt', default="base")
-    parser.add_argument('--model_path', type=str, help='store path', default="baffo32/decapoda-research-llama-7B-hf")
-    parser.add_argument('--save_path', type=str, help='save path', default="baffo32/decapoda-research-llama-7B-hf")
-    parser.add_argument('--eval_ppl', type=str, help='evaluate perplexity', default="True")
-    parser.add_argument('--check_sparsity', type=str, help='check sparsity', default="True")
-    parser.add_argument('--epochs', type=float, help='finetuning epochs', default=0.1)
-    parser.add_argument('--i', type=int, help='Number of iterations to run finetune', default=1)    
+    parser.add_argument('--sparsity', type=float, default=0.0, help='sparsity')
+    parser.add_argument('--action', type=str, default="base", help='action to perform')
+    parser.add_argument('--out_type', type=str, default="base", help='Type of the output in write.txt')
+    parser.add_argument('--model_path', type=str, default="baffo32/decapoda-research-llama-7B-hf", help='store path')
+    parser.add_argument('--save_path', type=str, default="baffo32/decapoda-research-llama-7B-hf", help='save path')
+    parser.add_argument('--auto_tokenizer_model_name', type=str, default="baffo32/decapoda-research-llama-7B-hf", help='name or path of the model from which the tokenizer will be inferred by autotokenizer. ')
+    parser.add_argument('--eval', type=str, default="True", help='evaluate model')
+    parser.add_argument('--check_sparsity', type=str, default="True", help='check sparsity')
+    parser.add_argument('--epochs', type=float, default=0.1, help='finetuning epochs')
+    parser.add_argument('--ft_iter', type=int, default=1, help='ith iteration for this finetuning if action = finetune, number of times fine-tuning has been performed if action = prune.')
+    parser.add_argument('--sparsity_per_iter', type=float, default=0.1, help='Sparasity add for each iteration during the iter pipline')
+
     args = parser.parse_args()
-    args.eval_ppl = eval(args.eval_ppl)
+
+    args.eval = eval(args.eval)
     args.check_sparsity = eval(args.check_sparsity)
     args.train = eval(args.train)
-    sparsity_txt = "0" + str(args.sparsity)[2:]
-    tokenizer = AutoTokenizer.from_pretrained("baffo32/decapoda-research-llama-7B-hf", use_fast = False)
-
-    if args.action == "finetune" and args.train:
-        finetune(tokenizer, args.model_path, args.save_path, args.i, args.epochs)
-    elif args.action == "prune" and args.train:
-        prune(model=args.model_path, save_path=args.save_path, sparsity=args.sparsity)
     
-    saved_model = None
-    metrics = {"iterations": round(args.i*args.epochs,2)}
+    tokenizer = AutoTokenizer.from_pretrained(args.auto_tokenizer_model_name, use_fast = False)
+
+    if args.action == "finetune":
+        finetune(tokenizer=tokenizer, model_name=args.model_path, save_path=args.save_path, seed=args.ft_iter, epochs=args.epochs)
+    elif args.action == "prune":
+        prune(model=args.model_path, save_path=args.save_path, sparsity=args.sparsity)
+    elif args.action == "base":
+        if args.model_path != args.save_path:
+            warnings.warn('--model_path and --save_path are not the same, which may casue unexpected behaviour, since model evaluation is based on --save_path.')
+    else:
+        raise ValueError('Unsupported --action : {}'.format(args.action))
+    
+    
+    metrics = {"finetune_iterations": args.ft_iter}
     sparsity = args.sparsity
+
+    # check the sparsity of the final model and compare sparsities
     if args.check_sparsity:
-        if saved_model == None:
-            saved_model = get_llm(args.save_path)
+        saved_model = get_llm(args.save_path)
         sparsity = check_sparsity(saved_model)
-        if(args.out_type=="prune_finetune" or args.out_type=="prune_finetune_iter"):
-            metrics["added_sparsity"] = args.sparsity - sparsity
+        metrics["added_sparsity"] = sparsity - args.sparsity
         print(sparsity)
-    if args.eval_ppl:
-        if saved_model == None:
-            saved_model = get_llm(args.save_path)
+
+    if args.eval:
+        saved_model = get_llm(args.save_path)
         accuracy_mmlu = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="cais/mmlu")
         accuracy_bbh = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="lukaemon/bbh")
         accuracy_belebele = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="facebook/belebele")
@@ -59,8 +68,6 @@ if __name__ == "__main__":
         metrics["mmlu"] = accuracy_mmlu
         metrics["belebele"] = accuracy_belebele
         metrics["factoid_qa"] = accuracy_factoid_qa
-        if args.out_type == "iter":
-            metrics["added_sparsity"] = 0.1
     
-    metrics["sparsity"] = round(sparsity,2)
-    write_results_v3(args.out_type, args.sparsity, metrics)
+    metrics["sparsity"] = round(sparsity, 2)
+    write_results(args.out_type, args.sparsity, metrics)

@@ -6,6 +6,7 @@ from typing import Literal
 from datasets import DatasetDict, Dataset, IterableDatasetDict, IterableDataset
 from factoid_qa.freebase_qa import FreebaseQA
 from utils import get_response, parse_choice, validate_response
+from .wanda.lib.eval import eval_ppl
 
 
 def eval_model(
@@ -23,8 +24,8 @@ def eval_model(
         model (AutoModelForCausalLM): the model to evaluate.
         tokenizer (AutoTokenizer): tokenizer.
         ds_name (str): name of the dataset.
-        device (device): device to load dataset to.
-        num_prompts (int): number of prompts to feed to the model.
+        device (device): device to load dataset to. Default to `torch.device("cuda:0")`.
+        num_prompts (int | None): number of prompts to feed to the model. If 'None', this will be all the prompts except examples. Default to 'None'.
         qa_data_path (str): path of the data for factoid qa.
 
     Returns:
