@@ -20,6 +20,8 @@
   <summary>Table of Contents</summary><br>
 
 - [Overview](#overview)
+   - [Pipelines](#pipelines)
+   - [Results](#results)
 - [Repository Structure](#repository-structure)
 - [Modules](#modules)
 - [Getting Started](#getting-started)
@@ -36,8 +38,8 @@ Large Language Models (LLMs) have proven to be remarkably accurate and effective
 ### Pipelines
 
 <p align="center">
-  <img src="plots\paper\procedure.jpg" alt="pipelines" width="300"/>
-  <img src="plots\paper\procedure_i.jpg" alt="pipelines" width="340"/>
+  <img src="plots\procedure.jpg" alt="pipelines" width="300"/>
+  <img src="plots\procedure_i.jpg" alt="pipelines" width="340"/>
 </p>
 
 ### Results
