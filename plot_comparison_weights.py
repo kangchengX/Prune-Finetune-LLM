@@ -224,54 +224,54 @@ def plot_layers_cumulative_diff(model_a, model_b, name_a, name_b, file_name, top
 # model_path = "models/iter/prune_ft0_77"
 
 
-models = {
-    'models/prune_ft05': 'Pruning 0.5 + Finetuning 0.1 epoch',
-    'models/ft_iter': 'Finetuning 0.5 epoch',
-    'models/ft': 'Finetuning 0.1 epoch'
-}
+# models = {
+#     'models/prune_ft05': 'Pruning 0.5 + Finetuning 0.1 epoch',
+#     'models/ft_iter': 'Finetuning 0.5 epoch',
+#     'models/ft': 'Finetuning 0.1 epoch'
+# }
 
 
 
-for path in models.keys():
-    plot_name = models[path]
-    file_name = path.split("/")[-1]
+# for path in models.keys():
+#     plot_name = models[path]
+#     file_name = path.split("/")[-1]
 
-plots = [
-    {
-        "path_a": "/cs/student/projects3/COMP0087/grp1/models/iter/prune_ft0_87",
-        "path_b": "/cs/student/projects3/COMP0087/grp1/models/prune_ft06",
-        "name_a": "iter (sparsity: 0.5)",
-        "name_b": "prune_finetune (sparsity: 0.5)",
-        "file_path": "paper/iter_vs_prft_05"
-    },
-    {
-        "path_a": "/cs/student/projects3/COMP0087/grp1/models/iter/prune_ft0_10",
-        "path_b": "/cs/student/projects3/COMP0087/grp1/models/prune_ft01",
-        "name_a": "iter (sparsity: 0.08)",
-        "name_b": "prune_finetune (sparsity: 0.08)",
-        "file_path": "paper/iter_vs_prft_008"
-    },
-    {
-        "path_a": "/cs/student/projects3/COMP0087/grp1/models/ft_prune01",
-        "path_b": "/cs/student/projects3/COMP0087/grp1/models/prune_ft01",
-        "name_a": "finetune_prune (sparsity: 0.1)",
-        "name_b": "prune_finetune (sparsity: 0.08)",
-        "file_path": "paper/ftpr_vs_prft_008"
-    },
-    {
-        "path_a": "/cs/student/projects3/COMP0087/grp1/models/ft_prune06",
-        "path_b": "/cs/student/projects3/COMP0087/grp1/models/prune_ft06",
-        "name_a": "finetune_prune (sparsity: 0.6)",
-        "name_b": "prune_finetune (sparsity: 0.5)",
-        "file_path": "paper/ftpr_vs_prft_06"
-    }
-]
+# plots = [
+#     {
+#         "path_a": "/cs/student/projects3/COMP0087/grp1/models/iter/prune_ft0_87",
+#         "path_b": "/cs/student/projects3/COMP0087/grp1/models/prune_ft06",
+#         "name_a": "iter (sparsity: 0.5)",
+#         "name_b": "prune_finetune (sparsity: 0.5)",
+#         "file_path": "paper/iter_vs_prft_05"
+#     },
+#     {
+#         "path_a": "/cs/student/projects3/COMP0087/grp1/models/iter/prune_ft0_10",
+#         "path_b": "/cs/student/projects3/COMP0087/grp1/models/prune_ft01",
+#         "name_a": "iter (sparsity: 0.08)",
+#         "name_b": "prune_finetune (sparsity: 0.08)",
+#         "file_path": "paper/iter_vs_prft_008"
+#     },
+#     {
+#         "path_a": "/cs/student/projects3/COMP0087/grp1/models/ft_prune01",
+#         "path_b": "/cs/student/projects3/COMP0087/grp1/models/prune_ft01",
+#         "name_a": "finetune_prune (sparsity: 0.1)",
+#         "name_b": "prune_finetune (sparsity: 0.08)",
+#         "file_path": "paper/ftpr_vs_prft_008"
+#     },
+#     {
+#         "path_a": "/cs/student/projects3/COMP0087/grp1/models/ft_prune06",
+#         "path_b": "/cs/student/projects3/COMP0087/grp1/models/prune_ft06",
+#         "name_a": "finetune_prune (sparsity: 0.6)",
+#         "name_b": "prune_finetune (sparsity: 0.5)",
+#         "file_path": "paper/ftpr_vs_prft_06"
+#     }
+# ]
 
-for plot in plots:
-    print(plot.keys())
-    model_a = AutoModelForCausalLM.from_pretrained(plot["path_a"])
-    model_b = AutoModelForCausalLM.from_pretrained(plot["path_b"])
-    file_name = plot['file_path']
-    plot_layers_cumulative_diff(model_a, model_b, plot["name_a"], plot["name_b"], file_name, top_k_percent=5)
-    print("Done.")
+# for plot in plots:
+#     print(plot.keys())
+#     model_a = AutoModelForCausalLM.from_pretrained(plot["path_a"])
+#     model_b = AutoModelForCausalLM.from_pretrained(plot["path_b"])
+#     file_name = plot['file_path']
+#     plot_layers_cumulative_diff(model_a, model_b, plot["name_a"], plot["name_b"], file_name, top_k_percent=5)
+#     print("Done.")
         

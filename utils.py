@@ -1,17 +1,8 @@
-import os, json
+import os, json, math
 import torch, bitsandbytes
 import torch.nn as nn
-from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Type, List
-
-
-def freeze_weights(model: nn.Module):
-    #freezing original weights
-    for param in model.parameters():
-        param.requires_grad = False  # freeze the model - train adapters later
-        if param.ndim == 1:
-            # cast the small parameters (e.g. layernorm) to fp32 for stability
-            param.data = param.data.to(torch.float32)
 
 
 def find_layers(module: nn.Module, layers: list[Type] | None = [nn.Linear,bitsandbytes.nn.Linear8bitLt], name: str | None = ''):
@@ -74,29 +65,41 @@ def get_response(
     return response
 
 
-def parse_choice(response):
-    choices=["A","B","C","D"]
+def parse_choice(response: str, choices: List[str] | None = ["A","B","C","D"]):
+    """
+    Takes a response string and returns the index of the choices or None if the choice is not valid.
+    
+    Args:
+        response (str): LLM's response.
+        choices (list): list of choices to select from.
+    
+    Returns:
+        out (int | None): Index of the choice selected, starting from 1, if the last character of the response is in `choices`.\
+            If the last character is not one of these choices, returns `None`.
+    """
     
     if response[-1] in choices:
         return choices.index(response[-1]) + 1
     else:
         return None
-
-def parse_choice_bbh(response):
-    choices=["(A)","(B)","(C)","(D)","(E)"]
-    
-    if response[-1] in choices:
-        return choices.index(response[-1]) + 1
-    else:
-        return None
     
 
-def get_llm(model_name, cache_dir="hf_cache", use_8bit=False):
+def get_llm(model_name: str, use_8bit : bool | None = False):
+    """
+    Load LLM from `model_name` to device. Assign `model.config.max_position_embeddings` to `model.seqlen`.
+
+    Args:
+        model_name (str): path or name of the model.
+        use_8bit (bool): if to load model in 8bit.
+
+    Returns:
+        model (AutoModelForCausalLM): the model.
+
+    """
     model = AutoModelForCausalLM.from_pretrained(
         model_name, 
         torch_dtype=torch.float16, 
         load_in_8bit=use_8bit,
-        cache_dir=cache_dir, 
         low_cpu_mem_usage=True, 
         device_map="cuda:0"
     )
@@ -105,66 +108,86 @@ def get_llm(model_name, cache_dir="hf_cache", use_8bit=False):
 
     return model
 
-def gen_path(path):
-    if not os.path.exists(path):
-        try:
-            # Create the directory
-            os.makedirs(path)
-            print(f"Directory '{path}' created successfully.")
-        except OSError as err:
-            print(f"Error creating directory '{path}': {err}")
-    else:
-        print(f"Directory '{path}' already exists.")
-
 
 def validate_response(correct_answer: List[str], generated_output: str):
+    """
+    Determine if any correct answer is present in the generated output.
+    
+    Args:
+        correct_answer (list): list of strings that represent the expected correct answers.
+        generated_output (str): response for LLM.
+    
+    Returns:
+        out (bool): `True` if any correct answer is found in the generated output; `False` otherwise.
+    """
     generated_output = generated_output.strip().replace(" ", "").lower()
     correct_answer = [item.strip().replace(" ", "").lower() for item in correct_answer]
     for ans in correct_answer:
-        if ans in generated_output: return 1
-    return 0
+        if ans in generated_output: return True
+    return False
 
 
-def initialize_file(file_name:str):
+def initialize_file(file_name: str):
+    """
+    Initialize the json file, with pipelines as keys and `[]` as values.
+
+    Args:
+        file_name (str): path of the json file.
+    """
+
     data = {}
-    data["finetune"] = []
-    data["prune"] = []
     data["base"] = []
+    data["finetune"] = []
     data["finetune_prune"] = []
+    data["finetune_iter"] = []
+    data["finetune_iter_prune"] = []
+    data["prune"] = []
     data["prune_finetune"] = []
     data["prune_finetune_iter"] = []
-    data["finetune_iter_prune"] = []
     data["iter"] = []
-    with open(f'{file_name.split(".")[0]}.json', 'w') as file:
-        json.dump(data, file, indent=4)
+
+    with open(os.path.splitext(file_name)[0] + '.json', 'w') as f:
+        json.dump(data, f, indent=4)
         
 
-def write_results(type:str, sparsity_txt, metrics):
-    assert type == "finetune" or \
-        type == "prune" or \
-        type == "base" or \
-        type == "finetune_prune" or \
-        type == "prune_finetune" or \
-        type == "prune_finetune_iter" or \
-        type == "finetune_iter_prune" or \
-        type == "iter", "Type is not valid"
-    if not(os.path.exists("res.json")):
-        initialize_file("res.json")
+def write_results(type: str, metrics: dict, results_path: str | None = "res.json"):
+    """
+    Write results to the file.
 
-    with open('res.json', 'r') as file:
-        data = json.load(file)
-        assert type in data, "File is not initialised correctly."
-        found = False
-        for item in data[type]:
-            #We are going to change the value for a specific sparsity
-            if item.get("sparsity")==sparsity_txt \
-                and item.get("iterations")==metrics["iterations"]:
-                print("Found", sparsity_txt, "==", item.get("sparsity"))
-                found = True
-                item.clear()  # Clear the existing dictionary
-                item.update(metrics)
-        if not found:
+    Args:
+        type (str): out_type, i.e., pipe line.
+        metrics (dict): dict with keys `"ppl"`, `"bbh"`, `"mmlu"`, `"belebele"`, `"factoid_qa"`, \
+            `"sparsity_prune"`, `"sparsity_latest"` and `"ft_iter"`.
+    """
+
+    assert type in [
+        "base",
+        "finetune",
+        "finetune_prune",
+        "finetune_iter",
+        "finetune_iter_prune",
+        "prune",
+        "prune_finetune",
+        "prune_finetune_iter",
+        "iter"
+    ], f"Unsupported type {type}"
+    
+    if not(os.path.exists(results_path)):
+        initialize_file(results_path)
+
+    with open(results_path, 'r') as f:
+        data = json.load(f)
+    assert type in data, "File is not initialised correctly."
+
+    for item in data[type]:
+        # change the value for a specific sparsity (and ft_iter)
+        if math.isclose(item.get("sparsity_prune"), metrics["sparsity_prune"]) and item.get("ft_iter") == metrics["ft_iter"]:
+            print(f"Found pipeline : {type}, sparsity_prune : {metrics["sparsity_prune"]}, ft_iter : {metrics["ft_iter"]}")
+            item.clear()  # Clear the existing dictionary
+            item.update(metrics)
+        else:
             data[type].append(metrics)
+
     # Write the updated data back to the file
-    with open('res.json', 'w') as file:
-        json.dump(data, file, indent=4)
+    with open(results_path, 'w') as f:
+        json.dump(data, f, indent=4)

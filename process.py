@@ -1,4 +1,4 @@
-import os, subprocess, sys
+import os, subprocess
 import torch
 import torch.nn as nn
 from datasets import load_dataset
@@ -14,7 +14,7 @@ class CastOutputToFloat(nn.Sequential):
 
 def finetune(
         tokenizer: AutoTokenizer, 
-        model_name: str, 
+        model: str, 
         save_path: str | None =  None, 
         seed: int | None = 1, 
         epochs: int | float | None = 0.1
@@ -34,7 +34,7 @@ def finetune(
         epochs (float): number of epochs.  
     """
     model = AutoModelForCausalLM.from_pretrained(
-        model_name,
+        model,
         torch_dtype=torch.float16,
         load_in_8bit=True,
         device_map='cuda:0'
@@ -89,27 +89,32 @@ def finetune(
         # Save the adapter model (this is useful if we need to remove the adapter)
         model.save_pretrained(save_path+"/adapter")
         #Then reload it and save it merged:
-        merge_peft(tokenizer,save_path)
+        merge_peft(tokenizer, save_path)
 
 
 def prune(model: str | None = "baffo32/decapoda-research-llama-7B-hf", save_path: str | None = None, sparsity: float | None = 0.5):
-    '''prune the model
+    """
+    Prune the model.
     
-    Input:
-        save_path: path to save the model
-        model: hugging face link or local model path
-        sparsity: the pruning sparsity
-    Output:
-        (not return): save the pruned model to save_path
-    '''
+    Args:
+        model (str): Can be either:
+            A string with the shortcut name of a pretrained model to load from cache or download, e.g., bert-base-uncased.
+            A string with the identifier name of a pretrained model that was user-uploaded to our S3, e.g., dbmdz/bert-base-german-cased.
+            A path to a directory containing model weights saved using save_pretrained(), e.g., ./my_model_directory/.
+            A path or url to a tensorflow index checkpoint file (e.g, ./tf_model/model.ckpt.index). In this case, from_tf should be set to True and a configuration object should be provided as config argument. This loading path is slower than converting the TensorFlow checkpoint in a PyTorch model using the provided conversion scripts and loading the PyTorch model afterwards.
+            Default to `"baffo32/decapoda-research-llama-7B-hf"`.
+
+        save_path (str): path to save the model.
+        sparsity (float): the pruning sparsity.
+    """
+
     # Prune the fine-tuned model
     # Define the command to prune the model using Wanda pruning method
-    print("PATH",sys.path)
     prune_command = [
-        "python", os.path.join(os.path.dirname(__file__),"wanda/main.py"),
+        "python", os.path.join(os.path.dirname(__file__), "wanda/main.py"),
         "--model", model,
         "--prune_method", "wanda",
-        "--sparsity_ratio", f"{sparsity}",
+        "--sparsity_ratio", str(sparsity),
         "--sparsity_type", "unstructured"
     ]
 
@@ -120,16 +125,26 @@ def prune(model: str | None = "baffo32/decapoda-research-llama-7B-hf", save_path
     subprocess.run(prune_command)
 
 
-def merge_peft(tokenizer, path):
+def merge_peft(tokenizer: AutoTokenizer, path: str):
+    """
+    Merge the model from peft model.
+    
+    Args:
+        tokenizer (AutoTokenizer): tokenizer.
+        path (str): path to save the model and the peft model is in path/adapter.
+    """
     with torch.no_grad():
         print("Reload and Merge models")
-        peft_model = AutoPeftModelForCausalLM.from_pretrained(path+"/adapter",
-                                                torch_dtype=torch.float16,
-                                                device_map='cuda:0')
+        peft_model = AutoPeftModelForCausalLM.from_pretrained(
+            path+"/adapter",
+            torch_dtype=torch.float16,
+            device_map='cuda:0'
+        )
         merged_model = peft_model.merge_and_unload()
         merged_model.save_pretrained(path)
         #We also have to store the tokenizer in the merged, study if this is needed or we can just move the 
         tokenizer.save_pretrained(path)
         del peft_model, tokenizer, merged_model
+
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
