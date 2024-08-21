@@ -1,7 +1,6 @@
 import os, argparse, warnings
 import torch
 from transformers import AutoTokenizer
-from .wanda.lib.eval import eval_ppl
 from .wanda.lib.prune_opt import check_sparsity
 from utils import get_llm, write_results
 from eval import eval_model
@@ -25,18 +24,16 @@ if __name__ == "__main__":
     parser.add_argument('--check_sparsity', type=str, default="True", help='check sparsity')
     parser.add_argument('--epochs', type=float, default=0.1, help='finetuning epochs')
     parser.add_argument('--ft_iter', type=int, default=1, help='ith iteration for this finetuning if action = finetune, number of times fine-tuning has been performed if action = prune.')
-    parser.add_argument('--sparsity_per_iter', type=float, default=0.1, help='Sparasity add for each iteration during the iter pipline')
 
     args = parser.parse_args()
 
     args.eval = eval(args.eval)
     args.check_sparsity = eval(args.check_sparsity)
-    args.train = eval(args.train)
     
     tokenizer = AutoTokenizer.from_pretrained(args.auto_tokenizer_model_name, use_fast = False)
 
     if args.action == "finetune":
-        finetune(tokenizer=tokenizer, model_name=args.model_path, save_path=args.save_path, seed=args.ft_iter, epochs=args.epochs)
+        finetune(tokenizer=tokenizer, model=args.model_path, save_path=args.save_path, seed=args.ft_iter, epochs=args.epochs)
     elif args.action == "prune":
         prune(model=args.model_path, save_path=args.save_path, sparsity=args.sparsity)
     elif args.action == "base":
@@ -47,14 +44,11 @@ if __name__ == "__main__":
     
     
     metrics = {"finetune_iterations": args.ft_iter}
-    sparsity = args.sparsity
-
+    sparsity_latest = None
     # check the sparsity of the final model and compare sparsities
     if args.check_sparsity:
         saved_model = get_llm(args.save_path)
-        sparsity = check_sparsity(saved_model)
-        metrics["added_sparsity"] = sparsity - args.sparsity
-        print(sparsity)
+        sparsity_latest = check_sparsity(saved_model)
 
     if args.eval:
         saved_model = get_llm(args.save_path)
@@ -62,12 +56,15 @@ if __name__ == "__main__":
         accuracy_bbh = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="lukaemon/bbh")
         accuracy_belebele = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="facebook/belebele")
         accuracy_factoid_qa = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="kelvin-jiang/factoid-qa")
-        ppl = eval_ppl(args, saved_model, tokenizer, device=torch.device("cuda:0"))
+        ppl = eval_model(saved_model, tokenizer, device=torch.device("cuda:0"), ds_name='wikitext2')
         metrics["ppl"] = ppl
         metrics["bbh"] = accuracy_bbh
         metrics["mmlu"] = accuracy_mmlu
         metrics["belebele"] = accuracy_belebele
         metrics["factoid_qa"] = accuracy_factoid_qa
     
-    metrics["sparsity"] = round(sparsity, 2)
+    metrics["sparsity_prune"] = round(args.sparsity, 2)
+    metrics["sparsity_latest"] = round(sparsity_latest, 2)
+    metrics["ft_iter"] = args.ft_iter
+
     write_results(args.out_type, args.sparsity, metrics)

@@ -1,9 +1,8 @@
 import torch, re, os, warnings
-from datasets import load_dataset
 from tqdm import tqdm 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import Literal
-from datasets import DatasetDict, Dataset, IterableDatasetDict, IterableDataset
+from datasets import DatasetDict, Dataset, IterableDatasetDict, IterableDataset, load_dataset
 from factoid_qa.freebase_qa import FreebaseQA
 from utils import get_response, parse_choice, validate_response
 from .wanda.lib.eval import eval_ppl
@@ -12,7 +11,7 @@ from .wanda.lib.eval import eval_ppl
 def eval_model(
         model: AutoModelForCausalLM, 
         tokenizer: AutoTokenizer, 
-        ds_name: Literal["facebook/belebele", "lukaemon/bbh", "cais/mmlu", 'kelvin-jiang/factoid-qa'],
+        ds_name: Literal["facebook/belebele", "lukaemon/bbh", "cais/mmlu", 'kelvin-jiang/factoid-qa', "wikitext2"],
         device: torch.device | None = torch.device("cuda:0"), 
         num_prompts: int | None = None, 
         qa_data_path: str | None = os.path.join(os.path.dirname(__file__), "factoid_qa/FreebaseQA-eval.json")
@@ -25,7 +24,7 @@ def eval_model(
         tokenizer (AutoTokenizer): tokenizer.
         ds_name (str): name of the dataset.
         device (device): device to load dataset to. Default to `torch.device("cuda:0")`.
-        num_prompts (int | None): number of prompts to feed to the model. If 'None', this will be all the prompts except examples. Default to 'None'.
+        num_prompts (int | None): number of prompts to feed to the model for the metrics but ppl. If 'None', this will be all the prompts except examples. Default to 'None'.
         qa_data_path (str): path of the data for factoid qa.
 
     Returns:
@@ -42,6 +41,8 @@ def eval_model(
         if num_prompts is None:
             num_prompts == 600
         return qa_accuracy(model, tokenizer, device=device, num_prompts=num_prompts, freebase_filepath=qa_data_path)
+    elif ds_name == "wikitext2":
+        return eval_ppl(None, model, tokenizer, device=device)
     else:
         raise ValueError('Unsupported ds_name {}'.format(ds_name))
     
@@ -252,7 +253,7 @@ def qa_accuracy(
 
         generate_ids = model.generate(inputs.input_ids, max_length=inputs["input_ids"].shape[-1] * 3)
         output = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-        is_match = validate_response(answers, output)
+        is_match = int(validate_response(answers, output))
         exact_match += is_match
         num_prompts_fed += 1
 
