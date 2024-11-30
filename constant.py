@@ -1,3 +1,5 @@
+import sys
+
 PIPELINE_SAVE_PATH_MAP = {
     "base" : "base",
     "finetune" : "model/ft",
@@ -7,7 +9,8 @@ PIPELINE_SAVE_PATH_MAP = {
     "prune" : "model/prune",
     "prune_finetune" : "models/prune_ft",
     "prune_finetune_iter" : "models/prune_ft_iter",
-    "iter" : "models/iter"
+    "iter_fp" : "models/iter_fp",
+    "iter_pf" : "models/iter_pf"
 }
 
-PYTHON_INTER = 'python'
+PYTHON_INTER = sys.executable
