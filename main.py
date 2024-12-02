@@ -20,7 +20,6 @@ if __name__ == "__main__":
     parser.add_argument('--save_path', type=str, default="baffo32/decapoda-research-llama-7B-hf", help='save path')
     parser.add_argument('--auto_tokenizer_model_name', type=str, default="baffo32/decapoda-research-llama-7B-hf", help='name or path of the model from which the tokenizer will be inferred by autotokenizer. ')
     parser.add_argument('--eval', type=str, default="True", help='evaluate model')
-    parser.add_argument('--check_sparsity', type=str, default="True", help='check sparsity')
     parser.add_argument('--epochs', type=float, default=0.1, help='finetuning epochs')
     parser.add_argument('--ft_iter', type=int, default=1, help='ith iteration for this finetuning if action = finetune, number of times fine-tuning has been performed if action = prune.')
     parser.add_argument('--results_path', type=str, default='results.json', help='path to save the results as a json file')
@@ -28,7 +27,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     args.eval = eval(args.eval)
-    args.check_sparsity = eval(args.check_sparsity)
     
     tokenizer = AutoTokenizer.from_pretrained(args.auto_tokenizer_model_name, use_fast = False)
 
@@ -46,14 +44,10 @@ if __name__ == "__main__":
     
     
     metrics = {"finetune_iterations": args.ft_iter}
-    sparsity_latest = None
-    # check the sparsity of the final model and compare sparsities
-    if args.check_sparsity:
-        saved_model = get_llm(args.save_path)
-        sparsity_latest = check_sparsity(saved_model)
 
     if args.eval:
         saved_model = get_llm(args.save_path)
+        sparsity_latest = check_sparsity(saved_model) # check the sparsity of the final model and compare sparsities
         accuracy_mmlu = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="cais/mmlu")
         accuracy_bbh = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="lukaemon/bbh")
         accuracy_belebele = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="facebook/belebele")
