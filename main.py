@@ -1,5 +1,4 @@
 import os, argparse, warnings
-import torch
 from transformers import AutoTokenizer
 from wanda.lib.prune import check_sparsity
 from utils import get_llm, write_results
@@ -48,11 +47,11 @@ if __name__ == "__main__":
     if args.eval:
         saved_model = get_llm(args.save_path)
         sparsity_latest = check_sparsity(saved_model) # check the sparsity of the final model and compare sparsities
-        accuracy_mmlu = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="cais/mmlu")
-        accuracy_bbh = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="lukaemon/bbh")
-        accuracy_belebele = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="facebook/belebele")
-        accuracy_factoid_qa = eval_model(saved_model, tokenizer, torch.device("cuda:0"), ds_name="kelvin-jiang/factoid-qa")
-        ppl = eval_model(saved_model, tokenizer, device=torch.device("cuda:0"), ds_name='wikitext2')
+        accuracy_mmlu = eval_model(saved_model, tokenizer, ds_name="cais/mmlu")
+        accuracy_bbh = eval_model(saved_model, tokenizer, ds_name="lukaemon/bbh")
+        accuracy_belebele = eval_model(saved_model, tokenizer, ds_name="facebook/belebele")
+        accuracy_factoid_qa = eval_model(saved_model, tokenizer, ds_name="kelvin-jiang/factoid-qa")
+        ppl = eval_model(saved_model, tokenizer, ds_name='wikitext2')
         metrics["ppl"] = ppl
         metrics["bbh"] = accuracy_bbh
         metrics["mmlu"] = accuracy_mmlu
