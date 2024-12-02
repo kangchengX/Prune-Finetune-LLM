@@ -182,7 +182,7 @@ def write_results(type: str, metrics: dict, results_path: str | None = "res.json
     for item in data[type]:
         # change the value for a specific sparsity (and ft_iter)
         if math.isclose(item.get("sparsity_prune"), metrics["sparsity_prune"]) and item.get("ft_iter") == metrics["ft_iter"]:
-            print(f"Found pipeline : {type}, sparsity_prune : {metrics["sparsity_prune"]}, ft_iter : {metrics["ft_iter"]}")
+            print(f"Found pipeline : {type}, sparsity_prune : {metrics['sparsity_prune']}, ft_iter : {metrics['ft_iter']}")
             item.clear()  # Clear the existing dictionary
             item.update(metrics)
         else:
