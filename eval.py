@@ -5,7 +5,7 @@ from typing import Literal
 from datasets import DatasetDict, Dataset, IterableDatasetDict, IterableDataset, load_dataset
 from factoid_qa.freebase_qa import FreebaseQA
 from utils import get_response, parse_choice, validate_response
-from .wanda.lib.eval import eval_ppl
+from wanda.lib.eval import eval_ppl
 
 
 def eval_model(
