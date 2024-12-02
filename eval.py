@@ -38,9 +38,10 @@ def eval_model(
     elif ds_name == "cais/mmlu":
         return eval_mmlu(model, tokenizer, device=device, num_prompts=num_prompts)
     elif ds_name == 'kelvin-jiang/factoid-qa':
+        # ensure qa accuracy is evaluated over a similar amount of prompts compared with other metrics
         if num_prompts is None:
-            num_prompts == 600
-        return qa_accuracy(model, tokenizer, device=device, num_prompts=num_prompts, freebase_filepath=qa_data_path)
+            num_prompts = 600 
+        return eval_qa_accuracy(model, tokenizer, device=device, num_prompts=num_prompts, freebase_filepath=qa_data_path)
     elif ds_name == "wikitext2":
         return eval_ppl(None, model, tokenizer, device=device)
     else:
@@ -227,7 +228,7 @@ def eval_belebele(
     return accuracy
 
 
-def qa_accuracy(
+def eval_qa_accuracy(
     model: AutoModelForCausalLM, 
     tokenizer: AutoTokenizer, 
     device: torch.device | None = torch.device("cuda:0"), 
