@@ -7,10 +7,6 @@ torch.manual_seed(87)
 np.random.seed(87)
 random.seed(87)
 
-cache_path = './hf_cache/'
-os.environ['HF_HOME'] = cache_path
-os.environ['TRANSFORMERS_CACHE'] = cache_path
-
 
 def check_use_saved_model(use_saved_model: bool | str, saved_model_path: str):
     """

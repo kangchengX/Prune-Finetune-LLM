@@ -9,7 +9,6 @@ from process import finetune, prune
 
 cache_path = './hf_cache/'
 os.environ['HF_HOME']=cache_path
-os.environ['TRANSFORMERS_CACHE'] = cache_path
 
 
 if __name__ == "__main__":
