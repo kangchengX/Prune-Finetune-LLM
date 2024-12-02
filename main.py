@@ -1,7 +1,7 @@
 import os, argparse, warnings
 import torch
 from transformers import AutoTokenizer
-from wanda.lib.prune_opt import check_sparsity
+from wanda.lib.prune import check_sparsity
 from utils import get_llm, write_results
 from eval import eval_model
 from process import finetune, prune
