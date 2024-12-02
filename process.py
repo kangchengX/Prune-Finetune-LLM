@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from datasets import load_dataset
 from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer, DataCollatorForLanguageModeling
-from peft import LoraConfig, get_peft_model, AutoPeftModelForCausalLM
+from peft import LoraConfig, get_peft_model
 
 
 class CastOutputToFloat(nn.Sequential):
@@ -86,10 +86,9 @@ def finetune(
     trainer.train()
     
     if save_path is not None:
-        # Save the adapter model (this is useful if we need to remove the adapter)
-        model.save_pretrained(save_path+"/adapter")
-        #Then reload it and save it merged:
-        merge_peft(tokenizer, save_path)
+        merged_model = model.merge_and_unload()
+        merged_model.save_pretrained(save_path)
+        tokenizer.save_pretrained(save_path)
 
 
 def prune(model: str | None = "baffo32/decapoda-research-llama-7B-hf", save_path: str | None = None, sparsity: float | None = 0.5):
@@ -123,28 +122,3 @@ def prune(model: str | None = "baffo32/decapoda-research-llama-7B-hf", save_path
 
     # Run the command
     subprocess.run(prune_command)
-
-
-def merge_peft(tokenizer: AutoTokenizer, path: str):
-    """
-    Merge the model from peft model.
-    
-    Args:
-        tokenizer (AutoTokenizer): tokenizer.
-        path (str): path to save the model and the peft model is in path/adapter.
-    """
-    with torch.no_grad():
-        print("Reload and Merge models")
-        peft_model = AutoPeftModelForCausalLM.from_pretrained(
-            path+"/adapter",
-            torch_dtype=torch.float16,
-            device_map='cuda:0'
-        )
-        merged_model = peft_model.merge_and_unload()
-        merged_model.save_pretrained(path)
-        #We also have to store the tokenizer in the merged, study if this is needed or we can just move the 
-        tokenizer.save_pretrained(path)
-        del peft_model, tokenizer, merged_model
-
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
