@@ -31,6 +31,8 @@ if __name__ == "__main__":
     
     tokenizer = AutoTokenizer.from_pretrained(args.auto_tokenizer_model_name, use_fast = False)
 
+    os.makedirs(args.save_path, exist_ok=True)
+    
     if args.action == "finetune":
         finetune(tokenizer=tokenizer, model=args.model_path, save_path=args.save_path, seed=args.ft_iter, epochs=args.epochs)
     elif args.action == "prune":
