@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--check_sparsity', type=str, default="True", help='check sparsity')
     parser.add_argument('--epochs', type=float, default=0.1, help='finetuning epochs')
     parser.add_argument('--ft_iter', type=int, default=1, help='ith iteration for this finetuning if action = finetune, number of times fine-tuning has been performed if action = prune.')
+    parser.add_argument('--results_path', type=str, default='results.json', help='path to save the results as a json file')
 
     args = parser.parse_args()
 
@@ -68,4 +69,4 @@ if __name__ == "__main__":
     metrics["sparsity_latest"] = round(sparsity_latest, 2)
     metrics["ft_iter"] = args.ft_iter
 
-    write_results(args.out_type, args.sparsity, metrics)
+    write_results(pipeline=args.out_type, metrics=metrics, results_path=args.results_path)

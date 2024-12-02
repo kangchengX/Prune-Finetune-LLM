@@ -1,4 +1,4 @@
-import os, json, math
+import os, json, math, warnings
 import torch, bitsandbytes
 import torch.nn as nn
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -127,66 +127,38 @@ def validate_response(correct_answer: List[str], generated_output: str):
     return False
 
 
-def initialize_file(file_name: str):
-    """
-    Initialize the json file, with pipelines as keys and `[]` as values.
-
-    Args:
-        file_name (str): path of the json file.
-    """
-
-    data = {}
-    data["base"] = []
-    data["finetune"] = []
-    data["finetune_prune"] = []
-    data["finetune_iter"] = []
-    data["finetune_iter_prune"] = []
-    data["prune"] = []
-    data["prune_finetune"] = []
-    data["prune_finetune_iter"] = []
-    data["iter"] = []
-
-    with open(os.path.splitext(file_name)[0] + '.json', 'w') as f:
-        json.dump(data, f, indent=4)
-        
-
-def write_results(type: str, metrics: dict, results_path: str | None = "res.json"):
+def write_results(pipeline: str, metrics: dict, results_path: str | None = "results.json"):
     """
     Write results to the file.
 
     Args:
-        type (str): out_type, i.e., pipe line.
+        pipeline (str): name of the pipeline.
         metrics (dict): dict with keys `"ppl"`, `"bbh"`, `"mmlu"`, `"belebele"`, `"factoid_qa"`, \
             `"sparsity_prune"`, `"sparsity_latest"` and `"ft_iter"`.
+        results_path (str): path to save the results as a json file.
     """
 
-    assert type in [
-        "base",
-        "finetune",
-        "finetune_prune",
-        "finetune_iter",
-        "finetune_iter_prune",
-        "prune",
-        "prune_finetune",
-        "prune_finetune_iter",
-        "iter"
-    ], f"Unsupported type {type}"
+    results_path = os.path.splitext(results_path)[0] + '.json'
     
-    if not(os.path.exists(results_path)):
-        initialize_file(results_path)
+    if os.path.exists(results_path):
+        with open(results_path, 'r') as f:
+            data = json.load(f)
+    else:
+        data = dict()
 
-    with open(results_path, 'r') as f:
-        data = json.load(f)
-    assert type in data, "File is not initialised correctly."
+    append_results = True
 
-    for item in data[type]:
-        # change the value for a specific sparsity (and ft_iter)
-        if math.isclose(item.get("sparsity_prune"), metrics["sparsity_prune"]) and item.get("ft_iter") == metrics["ft_iter"]:
-            print(f"Found pipeline : {type}, sparsity_prune : {metrics['sparsity_prune']}, ft_iter : {metrics['ft_iter']}")
-            item.clear()  # Clear the existing dictionary
-            item.update(metrics)
-        else:
-            data[type].append(metrics)
+    # data has type Dict[str(pipeline), List[Dict[str(metric), int | float]]]
+    for record in data.setdefault(pipeline, []):
+        # change the value for a specific sparsity and ft_iter
+        if math.isclose(record["sparsity_prune"], metrics["sparsity_prune"]) and record["ft_iter"] == metrics["ft_iter"]:
+            warnings.warn(f"Found pipeline : {pipeline}, sparsity_prune : {metrics['sparsity_prune']}, ft_iter : {metrics['ft_iter']}. The results will be overwritten")
+            record = metrics
+            append_results = False
+            break
+    
+    if append_results:
+        data[pipeline].append(metrics)
 
     # Write the updated data back to the file
     with open(results_path, 'w') as f:
