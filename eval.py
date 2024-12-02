@@ -9,12 +9,12 @@ from wanda.lib.eval import eval_ppl
 
 
 def eval_model(
-        model: AutoModelForCausalLM, 
-        tokenizer: AutoTokenizer, 
-        ds_name: Literal["facebook/belebele", "lukaemon/bbh", "cais/mmlu", 'kelvin-jiang/factoid-qa', "wikitext2"],
-        device: torch.device | None = torch.device("cuda:0"), 
-        num_prompts: int | None = None, 
-        qa_data_path: str | None = os.path.join(os.path.dirname(__file__), "factoid_qa/FreebaseQA-eval.json")
+    model: AutoModelForCausalLM, 
+    tokenizer: AutoTokenizer, 
+    ds_name: Literal["facebook/belebele", "lukaemon/bbh", "cais/mmlu", 'kelvin-jiang/factoid-qa', "wikitext2"],
+    device: torch.device | None = torch.device("cuda:0"), 
+    num_prompts: int | None = None, 
+    qa_data_path: str | None = os.path.join(os.path.dirname(__file__), "factoid_qa/FreebaseQA-eval.json")
 ):
     """
     Evaluate model's performance by metric determined by `ds_name`.
@@ -48,9 +48,9 @@ def eval_model(
     
 
 def select_dataset(
-        ds: DatasetDict | Dataset | IterableDatasetDict | IterableDataset,
-        num_examples: int | None = 5,
-        num_prompts: int | None = None
+    ds: DatasetDict | Dataset | IterableDatasetDict | IterableDataset,
+    num_examples: int | None = 5,
+    num_prompts: int | None = None
 ):
     """
     Select examples and prompts for inference.
@@ -79,11 +79,11 @@ def select_dataset(
 
 
 def eval_mmlu(
-        model: AutoModelForCausalLM, 
-        tokenizer: AutoTokenizer, 
-        device: torch.device | None = torch.device("cuda:0"), 
-        zero_shot: bool | None = False,
-        num_prompts: int | None = None
+    model: AutoModelForCausalLM, 
+    tokenizer: AutoTokenizer, 
+    device: torch.device | None = torch.device("cuda:0"), 
+    zero_shot: bool | None = False,
+    num_prompts: int | None = None
 ):
     """
     Evaluate mmlu.
@@ -128,11 +128,11 @@ def eval_mmlu(
 
 
 def eval_bbh_logical_deduction_five(
-        model: AutoModelForCausalLM, 
-        tokenizer: AutoTokenizer, 
-        device: torch.device | None = torch.device("cuda:0"), 
-        zero_shot: bool | None = True,
-        num_prompts: int | None = None
+    model: AutoModelForCausalLM, 
+    tokenizer: AutoTokenizer, 
+    device: torch.device | None = torch.device("cuda:0"), 
+    zero_shot: bool | None = True,
+    num_prompts: int | None = None
 ):
     """
     Evaluate bbh.
@@ -176,10 +176,10 @@ def eval_bbh_logical_deduction_five(
 
 
 def eval_belebele(
-        model: AutoModelForCausalLM, 
-        tokenizer: AutoTokenizer, 
-        device: torch.device | None = torch.device("cuda:0"), 
-        num_prompts: int | None = None
+    model: AutoModelForCausalLM, 
+    tokenizer: AutoTokenizer, 
+    device: torch.device | None = torch.device("cuda:0"), 
+    num_prompts: int | None = None
 ):
     """
     Evalute belebele.
@@ -228,11 +228,11 @@ def eval_belebele(
 
 
 def qa_accuracy(
-        model: AutoModelForCausalLM, 
-        tokenizer: AutoTokenizer, 
-        device: torch.device | None = torch.device("cuda:0"), 
-        freebase_filepath: str | None = os.path.join(os.path.dirname(__file__), "factoid_qa/FreebaseQA-eval.json"),
-        num_prompts: int | None = 600
+    model: AutoModelForCausalLM, 
+    tokenizer: AutoTokenizer, 
+    device: torch.device | None = torch.device("cuda:0"), 
+    freebase_filepath: str | None = os.path.join(os.path.dirname(__file__), "factoid_qa/FreebaseQA-eval.json"),
+    num_prompts: int | None = 600
 ):
     """
     Evaluate model's performance by factoid qa.

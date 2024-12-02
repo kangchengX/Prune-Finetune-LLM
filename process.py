@@ -14,11 +14,11 @@ class CastOutputToFloat(nn.Sequential):
 
 
 def finetune(
-        tokenizer: AutoTokenizer, 
-        model: str, 
-        save_path: str | None =  None, 
-        seed: int | None = 1, 
-        epochs: int | float | None = 0.1
+    tokenizer: AutoTokenizer, 
+    model: str, 
+    save_path: str | None =  None, 
+    seed: int | None = 1, 
+    epochs: int | float | None = 0.1
 ):
     """
     Fine-tuning the model using LoRA.
