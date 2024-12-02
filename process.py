@@ -4,6 +4,7 @@ import torch.nn as nn
 from datasets import load_dataset
 from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer, DataCollatorForLanguageModeling
 from peft import LoraConfig, get_peft_model
+from constant import PYTHON_INTER
 
 
 class CastOutputToFloat(nn.Sequential):
@@ -110,7 +111,7 @@ def prune(model: str | None = "baffo32/decapoda-research-llama-7B-hf", save_path
     # Prune the fine-tuned model
     # Define the command to prune the model using Wanda pruning method
     prune_command = [
-        "python", os.path.join(os.path.dirname(__file__), "wanda/main.py"),
+        PYTHON_INTER, os.path.join(os.path.dirname(__file__), "wanda/main.py"),
         "--model", model,
         "--prune_method", "wanda",
         "--sparsity_ratio", str(sparsity),
