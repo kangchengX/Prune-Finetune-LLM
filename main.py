@@ -60,6 +60,5 @@ if __name__ == "__main__":
     
     metrics["sparsity_prune"] = round(args.sparsity, 2)
     metrics["sparsity_latest"] = round(sparsity_latest, 2)
-    metrics["ft_iter"] = args.ft_iter
 
     write_results(pipeline=args.out_type, metrics=metrics, results_path=args.results_path)
