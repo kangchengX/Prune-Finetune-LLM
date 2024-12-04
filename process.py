@@ -1,9 +1,9 @@
-import os, subprocess
+import os, subprocess, shutil
 import torch
 import torch.nn as nn
 from datasets import load_dataset
 from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer, DataCollatorForLanguageModeling
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, get_peft_model, AutoPeftModelForCausalLM
 from constant import PYTHON_INTER
 
 
@@ -87,6 +87,14 @@ def finetune(
     trainer.train()
     
     if save_path is not None:
+        model.save_pretrained(save_path)
+        # reload model without 8-bit Quantization
+        model = AutoPeftModelForCausalLM.from_pretrained(
+            save_path,
+            torch_dtype=torch.float16,
+            device_map='cuda:0'
+        )
+        shutil.rmtree(save_path)
         merged_model = model.merge_and_unload()
         merged_model.save_pretrained(save_path)
         tokenizer.save_pretrained(save_path)
