@@ -1,11 +1,6 @@
-import subprocess, os, argparse, random
+import subprocess, os, argparse
 import numpy as np
-import torch
 from constant import PIPELINE_SAVE_PATH_MAP, PYTHON_INTER
-
-torch.manual_seed(87)
-np.random.seed(87)
-random.seed(87)
 
 
 def check_use_saved_model(use_saved_model: bool | str, saved_model_path: str):
