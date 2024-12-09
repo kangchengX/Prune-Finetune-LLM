@@ -256,7 +256,8 @@ if __name__ == "__main__":
                 "--sparsity", str(sp),
                 "--model_path", model_to_prune,
                 "--save_path", os.path.join(save_paths["iter_pf"], 'prune' + sparsity_txt),
-                "--ft_iter", str(p)
+                "--ft_iter", str(p),
+                "--not_eval"
             ]
             subprocess.run(prune)
 
@@ -284,7 +285,8 @@ if __name__ == "__main__":
                 "--sparsity", str(sp),
                 "--model_path", model_to_finetune,
                 "--save_path", os.path.join(save_paths["iter_fp"], 'ft' + sparsity_txt),
-                "--ft_iter", str(p+1)
+                "--ft_iter", str(p+1),
+                "--not_eval"
             ]
             subprocess.run(finetune)
 
