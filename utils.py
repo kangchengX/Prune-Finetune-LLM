@@ -153,7 +153,7 @@ def write_results(pipeline: str, metrics: dict, results_path: str | None = "resu
         # change the value for a specific sparsity and ft_iter
         if math.isclose(record["sparsity_prune"], metrics["sparsity_prune"]) and record["finetune_iterations"] == metrics["finetune_iterations"]:
             warnings.warn(f"Found pipeline : {pipeline}, sparsity_prune : {metrics['sparsity_prune']}, \
-                          finetune_iterations : {metrics["finetune_iterations"]}. The results will be overwritten.")
+                          finetune_iterations : {metrics['finetune_iterations']}. The results will be overwritten.")
             record = metrics
             append_results = False
             break
