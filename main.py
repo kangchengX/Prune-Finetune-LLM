@@ -18,7 +18,7 @@ def main():
     parser.add_argument('--model_path', type=str, default="baffo32/decapoda-research-llama-7B-hf", help='store path')
     parser.add_argument('--save_path', type=str, default="baffo32/decapoda-research-llama-7B-hf", help='save path')
     parser.add_argument('--auto_tokenizer_model_name', type=str, default="baffo32/decapoda-research-llama-7B-hf", help='name or path of the model from which the tokenizer will be inferred by autotokenizer. ')
-    parser.add_argument('--not_eval', action="store_false", help='not to evaluate the model')
+    parser.add_argument('--not_eval', action="store_true", help='not to evaluate the model')
     parser.add_argument('--epochs', type=float, default=0.1, help='finetuning epochs')
     parser.add_argument('--ft_iter', type=int, default=1, help='ith iteration for this finetuning if action = finetune, number of times fine-tuning has been performed if action = prune.')
     parser.add_argument('--results_path', type=str, default='results.json', help='path to save the results as a json file')
