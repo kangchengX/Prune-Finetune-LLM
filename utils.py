@@ -151,8 +151,9 @@ def write_results(pipeline: str, metrics: dict, results_path: str | None = "resu
     # data has type Dict[str(pipeline), List[Dict[str(metric), int | float]]]
     for record in data.setdefault(pipeline, []):
         # change the value for a specific sparsity and ft_iter
-        if math.isclose(record["sparsity_prune"], metrics["sparsity_prune"]) and record["ft_iter"] == metrics["ft_iter"]:
-            warnings.warn(f"Found pipeline : {pipeline}, sparsity_prune : {metrics['sparsity_prune']}, ft_iter : {metrics['ft_iter']}. The results will be overwritten")
+        if math.isclose(record["sparsity_prune"], metrics["sparsity_prune"]) and record["finetune_iterations"] == metrics["finetune_iterations"]:
+            warnings.warn(f"Found pipeline : {pipeline}, sparsity_prune : {metrics['sparsity_prune']}, \
+                          finetune_iterations : {metrics["finetune_iterations"]}. The results will be overwritten.")
             record = metrics
             append_results = False
             break
