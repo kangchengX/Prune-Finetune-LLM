@@ -2,7 +2,7 @@ import os, argparse, warnings
 from transformers import AutoTokenizer
 from wanda.lib.prune import check_sparsity
 from utils import get_llm, write_results
-from eval import eval_model
+from evaluation import eval_model
 from process import finetune, prune
 
 
