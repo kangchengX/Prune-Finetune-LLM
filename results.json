@@ -1,0 +1,375 @@
+{
+    "prune": [
+        {
+            "finetune_iterations": 0,
+            "ppl": 5.696313381195068,
+            "bbh": 17.551020408163264,
+            "mmlu": 28.73833440193774,
+            "belebele": 43.687150837988824,
+            "factoid_qa": 75.66666666666667,
+            "sparsity_prune": 0.1,
+            "sparsity_latest": 0.1,
+            "ft_iter": 0
+        },
+        {
+            "finetune_iterations": 0,
+            "ppl": 5.816872596740723,
+            "bbh": 16.73469387755102,
+            "mmlu": 27.85495476241362,
+            "belebele": 44.134078212290504,
+            "factoid_qa": 71.16666666666667,
+            "sparsity_prune": 0.2,
+            "sparsity_latest": 0.2
+        },
+        {
+            "finetune_iterations": 0,
+            "ppl": 5.9988250732421875,
+            "bbh": 17.551020408163264,
+            "mmlu": 27.448885089406566,
+            "belebele": 39.32960893854748,
+            "factoid_qa": 64.83333333333333,
+            "sparsity_prune": 0.3,
+            "sparsity_latest": 0.3
+        },
+        {
+            "finetune_iterations": 0,
+            "ppl": 6.386017799377441,
+            "bbh": 20.408163265306122,
+            "mmlu": 26.992947210942507,
+            "belebele": 37.6536312849162,
+            "factoid_qa": 59.333333333333336,
+            "sparsity_prune": 0.4,
+            "sparsity_latest": 0.4
+        },
+        {
+            "finetune_iterations": 0,
+            "ppl": 7.258586406707764,
+            "bbh": 22.040816326530614,
+            "mmlu": 26.173683835577403,
+            "belebele": 32.513966480446925,
+            "factoid_qa": 38.5,
+            "sparsity_prune": 0.5,
+            "sparsity_latest": 0.5
+        },
+        {
+            "finetune_iterations": 0,
+            "ppl": 10.731130599975586,
+            "bbh": 13.46938775510204,
+            "mmlu": 24.862862434993232,
+            "belebele": 28.156424581005584,
+            "factoid_qa": 9.166666666666666,
+            "sparsity_prune": 0.6,
+            "sparsity_latest": 0.6
+        },
+        {
+            "finetune_iterations": 0,
+            "ppl": 83.40939331054688,
+            "bbh": 0.0,
+            "mmlu": 24.520909026145187,
+            "belebele": 12.960893854748603,
+            "factoid_qa": 0.5,
+            "sparsity_prune": 0.7,
+            "sparsity_latest": 0.7
+        }
+    ],
+    "finetune": [
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.3239946365356445,
+            "bbh": 17.142857142857142,
+            "mmlu": 28.759706489990737,
+            "belebele": 43.35195530726257,
+            "factoid_qa": 74.16666666666667,
+            "sparsity_prune": 0.0,
+            "sparsity_latest": 0.0
+        }
+    ],
+    "finetune_prune": [
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.346372127532959,
+            "bbh": 18.775510204081634,
+            "mmlu": 29.023295575977777,
+            "belebele": 43.798882681564244,
+            "factoid_qa": 73.66666666666667,
+            "sparsity_prune": 0.1,
+            "sparsity_latest": 0.1
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.470205783843994,
+            "bbh": 20.816326530612244,
+            "mmlu": 28.054427584241648,
+            "belebele": 42.79329608938547,
+            "factoid_qa": 70.5,
+            "sparsity_prune": 0.2,
+            "sparsity_latest": 0.2
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.643998146057129,
+            "bbh": 18.367346938775512,
+            "mmlu": 26.935954976134504,
+            "belebele": 38.88268156424581,
+            "factoid_qa": 64.66666666666666,
+            "sparsity_prune": 0.3,
+            "sparsity_latest": 0.3
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 6.0104475021362305,
+            "bbh": 20.408163265306122,
+            "mmlu": 27.01431929899551,
+            "belebele": 37.76536312849162,
+            "factoid_qa": 60.333333333333336,
+            "sparsity_prune": 0.4,
+            "sparsity_latest": 0.4
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 6.826025009155273,
+            "bbh": 21.224489795918366,
+            "mmlu": 25.76049013321935,
+            "belebele": 36.312849162011176,
+            "factoid_qa": 36.333333333333336,
+            "sparsity_prune": 0.5,
+            "sparsity_latest": 0.5
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 10.031732559204102,
+            "bbh": 15.510204081632653,
+            "mmlu": 25.026715110066256,
+            "belebele": 28.156424581005584,
+            "factoid_qa": 7.833333333333334,
+            "sparsity_prune": 0.6,
+            "sparsity_latest": 0.6
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 78.64897155761719,
+            "bbh": 0.0,
+            "mmlu": 24.349932321721166,
+            "belebele": 18.212290502793298,
+            "factoid_qa": 0.5,
+            "sparsity_prune": 0.7,
+            "sparsity_latest": 0.7
+        }
+    ],
+    "prune_finetune": [
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.382471084594727,
+            "bbh": 17.142857142857142,
+            "mmlu": 28.973427370520767,
+            "belebele": 43.575418994413404,
+            "factoid_qa": 73.66666666666667,
+            "sparsity_prune": 0.1,
+            "sparsity_latest": 0.08
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.4497480392456055,
+            "bbh": 19.183673469387756,
+            "mmlu": 28.22540428866567,
+            "belebele": 42.3463687150838,
+            "factoid_qa": 73.33333333333333,
+            "sparsity_prune": 0.2,
+            "sparsity_latest": 0.17
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.5745744705200195,
+            "bbh": 21.63265306122449,
+            "mmlu": 27.02144332834651,
+            "belebele": 40.22346368715084,
+            "factoid_qa": 67.0,
+            "sparsity_prune": 0.3,
+            "sparsity_latest": 0.25
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.9019365310668945,
+            "bbh": 20.408163265306122,
+            "mmlu": 26.736482154306472,
+            "belebele": 37.09497206703911,
+            "factoid_qa": 61.0,
+            "sparsity_prune": 0.4,
+            "sparsity_latest": 0.33
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 6.5236663818359375,
+            "bbh": 22.448979591836736,
+            "mmlu": 28.154163995155663,
+            "belebele": 35.64245810055866,
+            "factoid_qa": 48.833333333333336,
+            "sparsity_prune": 0.5,
+            "sparsity_latest": 0.42
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 7.779484748840332,
+            "bbh": 17.959183673469386,
+            "mmlu": 25.07658331552326,
+            "belebele": 29.497206703910617,
+            "factoid_qa": 25.666666666666664,
+            "sparsity_prune": 0.6,
+            "sparsity_latest": 0.5
+        },
+        {
+            "finetune_iterations": 1,
+            "ppl": 20.35135269165039,
+            "bbh": 0.0,
+            "mmlu": 24.399800527178172,
+            "belebele": 16.64804469273743,
+            "factoid_qa": 0.6666666666666667,
+            "sparsity_prune": 0.7,
+            "sparsity_latest": 0.59
+        }
+    ],
+    "iter_pf": [
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.3777899742126465,
+            "bbh": 17.959183673469386,
+            "mmlu": 29.094535869487782,
+            "belebele": 43.24022346368715,
+            "factoid_qa": 73.16666666666667,
+            "sparsity_prune": 0.1,
+            "sparsity_latest": 0.08
+        },
+        {
+            "finetune_iterations": 2,
+            "ppl": 5.472903251647949,
+            "bbh": 20.816326530612244,
+            "mmlu": 28.239652347367674,
+            "belebele": 44.46927374301676,
+            "factoid_qa": 71.33333333333334,
+            "sparsity_prune": 0.2,
+            "sparsity_latest": 0.17
+        },
+        {
+            "finetune_iterations": 3,
+            "ppl": 5.640495777130127,
+            "bbh": 19.591836734693878,
+            "mmlu": 27.342024649141557,
+            "belebele": 40.44692737430168,
+            "factoid_qa": 68.33333333333333,
+            "sparsity_prune": 0.3,
+            "sparsity_latest": 0.25
+        },
+        {
+            "finetune_iterations": 4,
+            "ppl": 5.9495110511779785,
+            "bbh": 20.408163265306122,
+            "mmlu": 27.178171974068533,
+            "belebele": 38.77094972067039,
+            "factoid_qa": 64.16666666666667,
+            "sparsity_prune": 0.4,
+            "sparsity_latest": 0.33
+        },
+        {
+            "finetune_iterations": 5,
+            "ppl": 6.681410312652588,
+            "bbh": 20.816326530612244,
+            "mmlu": 27.491629265512575,
+            "belebele": 36.98324022346369,
+            "factoid_qa": 54.333333333333336,
+            "sparsity_prune": 0.5,
+            "sparsity_latest": 0.42
+        },
+        {
+            "finetune_iterations": 6,
+            "ppl": 8.044337272644043,
+            "bbh": 20.408163265306122,
+            "mmlu": 24.442544703284177,
+            "belebele": 30.614525139664806,
+            "factoid_qa": 24.833333333333332,
+            "sparsity_prune": 0.6,
+            "sparsity_latest": 0.5
+        },
+        {
+            "finetune_iterations": 7,
+            "ppl": 11.687637329101562,
+            "bbh": 17.142857142857142,
+            "mmlu": 24.492412908741183,
+            "belebele": 25.251396648044693,
+            "factoid_qa": 2.166666666666667,
+            "sparsity_prune": 0.7,
+            "sparsity_latest": 0.59
+        }
+    ],
+    "iter_fp": [
+        {
+            "finetune_iterations": 1,
+            "ppl": 5.394396781921387,
+            "bbh": 16.73469387755102,
+            "mmlu": 28.93780722376576,
+            "belebele": 43.798882681564244,
+            "factoid_qa": 73.83333333333333,
+            "sparsity_prune": 0.1,
+            "sparsity_latest": 0.1
+        },
+        {
+            "finetune_iterations": 2,
+            "ppl": 5.509576320648193,
+            "bbh": 18.367346938775512,
+            "mmlu": 28.31801667022868,
+            "belebele": 44.022346368715084,
+            "factoid_qa": 70.66666666666667,
+            "sparsity_prune": 0.2,
+            "sparsity_latest": 0.2
+        },
+        {
+            "finetune_iterations": 3,
+            "ppl": 5.675718307495117,
+            "bbh": 18.367346938775512,
+            "mmlu": 27.349148678492558,
+            "belebele": 40.0,
+            "factoid_qa": 66.66666666666666,
+            "sparsity_prune": 0.3,
+            "sparsity_latest": 0.3
+        },
+        {
+            "finetune_iterations": 4,
+            "ppl": 6.0194830894470215,
+            "bbh": 20.408163265306122,
+            "mmlu": 27.206668091472537,
+            "belebele": 38.212290502793294,
+            "factoid_qa": 62.16666666666667,
+            "sparsity_prune": 0.4,
+            "sparsity_latest": 0.4
+        },
+        {
+            "finetune_iterations": 5,
+            "ppl": 6.838042259216309,
+            "bbh": 18.775510204081634,
+            "mmlu": 28.025931466837644,
+            "belebele": 36.201117318435756,
+            "factoid_qa": 45.83333333333333,
+            "sparsity_prune": 0.5,
+            "sparsity_latest": 0.5
+        },
+        {
+            "finetune_iterations": 6,
+            "ppl": 8.950368881225586,
+            "bbh": 19.183673469387756,
+            "mmlu": 24.898482581748237,
+            "belebele": 28.156424581005584,
+            "factoid_qa": 18.833333333333332,
+            "sparsity_prune": 0.6,
+            "sparsity_latest": 0.6
+        },
+        {
+            "finetune_iterations": 7,
+            "ppl": 19.34976577758789,
+            "bbh": 0.0,
+            "mmlu": 24.812994229536226,
+            "belebele": 22.45810055865922,
+            "factoid_qa": 0.6666666666666667,
+            "sparsity_prune": 0.7,
+            "sparsity_latest": 0.7
+        }
+    ]
+}
