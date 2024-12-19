@@ -26,7 +26,6 @@
 - [Modules](#modules)
 - [Getting Started](#getting-started)
    - [Installation](#installation)
-   - [Usage](#usage)
 - [Acknowledgments](#acknowledgments)
 </details>
 <hr>
@@ -42,16 +41,23 @@ Large Language Models (LLMs) have proven to be remarkably accurate and effective
   <img src="plots\procedure_i.jpg" alt="pipelines" width="340"/>
 </p>
 
+
+- **prune**: only prune the model for one time.
+- **prune_finetune**: fine-tune -> prune (the left pipeline in the left figure with L = 1).
+- **finetune_prune**: prune -> fine-tune (the right pipeline in the left figure with L = 1).. 
+- **iter_pf**: (prune -> fine-tune) x L (the left pipeline in the right figure).
+- **iter_fp**: (fine-tune -> prune) x L (the right pipeline in the right figure).
+
 ### Results
 
 <table align="center">
   <tr>
-    <td><img src="plots\bbh_comp_advanced.png" alt="bbh" width="310"/></td>
-    <td><img src="plots\belebele_comp_advanced.png" alt="belebele" width="310"/></td>
+    <td><img src="plots\bbh.png" alt="bbh" width="310"/></td>
+    <td><img src="plots\belebele.png" alt="belebele" width="310"/></td>
   </tr>
   <tr>
-    <td><img src="plots\mmlu_comp_advanced.png" alt="mmlu" width="310"/></td>
-    <td><img src="plots\factoid_qa_comp_advanced.png" alt="factoid_qa" width="310"/></td>
+    <td><img src="plots\mmlu.png" alt="mmlu" width="310"/></td>
+    <td><img src="plots\factoid_qa.png" alt="factoid_qa" width="310"/></td>
   </tr>
 </table>
 
@@ -137,12 +143,27 @@ This directory visualization results.
 > $ git clone --recurse-submodules https://github.com/kangchengX/Prune-Finetune-LLM.git
 > ```
 >
-> 2. Change to the project directory:
+> 2. Install venv
+> ```console
+> $ apt install python3-venv
+> ```
+>
+> 3. Create virtual environment
+> ```console
+> $ python -m venv venv
+> ```
+>
+> 4. Activate the virtual environement
+> ```console
+> $ source venv/bin/activate
+> ```
+> 
+> 5. Change to the project directory:
 > ```console
 > $ cd Prune-Finetune-LLM
 > ```
 >
-> 3. Install the dependencies:
+> 6. Install the dependencies:
 > ```console
 > $ pip install -r requirements.txt
 > ```
