@@ -4,10 +4,10 @@ from wanda.lib.prune import check_sparsity
 from utils import get_llm, write_results
 from evaluation import eval_model
 from process import finetune, prune
+from constant import CACHE_PATH
 
 
-cache_path = './hf_cache/'
-os.environ['HF_HOME']=cache_path
+os.environ['HF_HOME'] = CACHE_PATH
 
 
 def main():

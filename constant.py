@@ -1,5 +1,6 @@
 import sys
 
+
 PIPELINE_SAVE_PATH_MAP = {
     "base" : "base",
     "finetune" : "model/ft",
@@ -13,4 +14,5 @@ PIPELINE_SAVE_PATH_MAP = {
     "iter_pf" : "models/iter_pf"
 }
 
-PYTHON_INTER = sys.executable
+PYTHON_INTER = sys.executable # Path to the python interpreter
+CACHE_PATH = './hf_cache/' # Path to the cache directory
